@@ -7,30 +7,38 @@
     <style>
         :root[data-theme="light"] {
             --primary: #8b0000; --secondary: #2c3e50; --bg: #f4ece1; --card-bg: #fffdfa;
-            --text: #332b21; --accent: #bc9a70; --form-bg: #e9decb; --edit-mode: #e3f2fd;
+            --text: #332b21; --accent: #bc9a70; --form-bg: #e9decb; --edit-mode: #e3f2fd; --pin-bg: #d4c4a8;
         }
         :root[data-theme="dark"] {
             --primary: #ff4d4d; --secondary: #bdc3c7; --bg: #1a1a1a; --card-bg: #2d2d2d;
-            --text: #e0e0e0; --accent: #5d4a36; --form-bg: #3d3d3d; --edit-mode: #1a3a5a;
+            --text: #e0e0e0; --accent: #5d4a36; --form-bg: #3d3d3d; --edit-mode: #1a3a5a; --pin-bg: #4a3f35;
         }
-        body { font-family: 'Palatino', 'Georgia', serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: all 0.3s; }
+        body { font-family: 'Palatino', 'Georgia', serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: all 0.3s; scroll-behavior: smooth; }
         .container { max-width: 1200px; margin: auto; }
         header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); margin-bottom: 20px; }
-        h1 { color: var(--primary); text-transform: uppercase; letter-spacing: 2px; }
-        .theme-toggle { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        h1 { color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin: 10px 0; }
+        
+        /* Sezione Pin */
+        .pinned-section { background: var(--pin-bg); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px dashed var(--primary); }
+        .pinned-section h2 { font-size: 1.1em; margin-top: 0; color: var(--primary); text-transform: uppercase; }
+        .pinned-container { display: flex; flex-wrap: wrap; gap: 10px; }
+        .pinned-item { 
+            background: var(--card-bg); padding: 8px 15px; border-radius: 20px; border: 1px solid var(--primary); 
+            cursor: pointer; font-weight: bold; font-size: 0.9em; display: flex; align-items: center; gap: 8px;
+            transition: transform 0.2s;
+        }
+        .pinned-item:hover { transform: translateY(-2px); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .unpin-btn { color: var(--primary); cursor: pointer; font-size: 1.2em; line-height: 1; }
 
-        /* Form Styling */
+        /* Form e altri stili */
         .spell-form {
             background: var(--form-bg); padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             margin-bottom: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;
         }
-        .spell-form.editing { background: var(--edit-mode); border: 2px solid #1565c0; }
         .field-group { display: flex; flex-direction: column; gap: 5px; }
-        .field-group label { font-size: 0.85em; font-weight: bold; color: var(--primary); }
         input, select, textarea { background: var(--card-bg); color: var(--text); padding: 10px; border: 1px solid var(--accent); border-radius: 4px; font-family: inherit; }
         .full-width { grid-column: 1 / -1; }
-
-        /* Toggles */
+        
         .toggle-container { display: flex; align-items: center; gap: 10px; font-size: 0.9em; padding: 5px 0; }
         .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -39,18 +47,13 @@
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        /* Controls Area */
-        .io-controls { background: var(--form-bg); padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .search-row { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
-        .filter-info { font-size: 0.8em; opacity: 0.8; margin-top: -10px; }
-
-        /* Spell Cards */
         .spell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
         .spell-card { background: var(--card-bg); border: 1px solid var(--accent); border-left: 8px solid var(--primary); padding: 25px; border-radius: 4px; position: relative; }
-        .spell-card h3 { margin: 0; color: var(--primary); }
-        .spell-meta-line { font-size: 0.9em; border-bottom: 1px solid var(--accent); padding: 5px 0; margin-bottom: 5px; }
-        
+        .pin-card-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.4em; cursor: pointer; filter: grayscale(1); }
+        .pin-card-btn.active { filter: grayscale(0); }
+
         .btn-main { background: var(--primary); color: white; padding: 15px; grid-column: 1 / -1; font-size: 1.1em; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+        .io-controls { background: var(--form-bg); padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; }
         .card-actions { margin-top: 15px; display: flex; gap: 10px; }
         .btn-edit { background: #ff9800; color: white; flex: 1; padding: 8px; border: none; border-radius: 4px; cursor: pointer; }
         .btn-delete { background: #f44336; color: white; flex: 1; padding: 8px; border: none; border-radius: 4px; cursor: pointer; }
@@ -60,21 +63,21 @@
 
 <div class="container">
     <header>
-        <h1>📖 Compendio Homebrew</h1>
-        <button class="theme-toggle" onclick="toggleTheme()">🌓 Cambia Tema</button>
+        <h1>📖 Grimorio Homebrew</h1>
+        <button class="theme-toggle" onclick="toggleTheme()">🌓 Tema</button>
     </header>
+
+    <!-- SEZIONE PINNATI -->
+    <div class="pinned-section" id="pinnedSection" style="display: none;">
+        <h2>📌 Incantesimi Preparati</h2>
+        <div class="pinned-container" id="pinnedContainer"></div>
+    </div>
 
     <!-- FORM INSERIMENTO -->
     <section class="spell-form" id="spellForm">
         <input type="hidden" id="editId">
-        <div class="field-group">
-            <label>Nome (ITA)</label>
-            <input type="text" id="nameIta" placeholder="Palla di Fuoco">
-        </div>
-        <div class="field-group">
-            <label>Nome (ENG)</label>
-            <input type="text" id="nameEng" placeholder="Fireball">
-        </div>
+        <div class="field-group"><label>Nome (ITA)</label><input type="text" id="nameIta"></div>
+        <div class="field-group"><label>Nome (ENG)</label><input type="text" id="nameEng"></div>
         <div class="field-group">
             <label>Livello</label>
             <select id="level">
@@ -83,99 +86,70 @@
             </select>
         </div>
         <div class="field-group">
-            <label>Scuola di Magia</label>
+            <label>Scuola</label>
             <select id="school">
-                <option value="Abiurazione">Abiurazione</option>
-                <option value="Ammaliamento">Ammaliamento</option>
-                <option value="Divinazione">Divinazione</option>
-                <option value="Evocazione">Evocazione</option>
-                <option value="Illusione">Illusione</option>
-                <option value="Invocazione">Invocazione</option>
-                <option value="Necromanzia">Necromanzia</option>
-                <option value="Trasmutazione">Trasmutazione</option>
+                <option>Abiurazione</option><option>Ammaliamento</option><option>Divinazione</option><option>Evocazione</option>
+                <option>Illusione</option><option>Invocazione</option><option>Necromanzia</option><option>Trasmutazione</option>
             </select>
         </div>
         <div class="field-group">
-            <label>Tempo di Lancio</label>
+            <label>Lancio</label>
             <select id="castingTime">
-                <option value="1 azione">1 azione</option>
-                <option value="1 azione bonus">1 azione bonus</option>
-                <option value="1 reazione">1 reazione</option>
-                <option value="1 minuto">1 minuto</option>
-                <option value="10 minuti">10 minuti</option>
-                <option value="1 ora">1 ora</option>
+                <option>1 azione</option><option>1 azione bonus</option><option>1 reazione</option>
+                <option>1 minuto</option><option>10 minuti</option><option>1 ora</option>
             </select>
         </div>
-        <div class="field-group">
-            <label>Gittata</label>
-            <input type="text" id="range" placeholder="18 metri">
-        </div>
-        <div class="field-group">
-            <label>Durata</label>
-            <input type="text" id="duration" placeholder="Istantanea">
-        </div>
+        <div class="field-group"><label>Gittata</label><input type="text" id="range"></div>
+        <div class="field-group"><label>Durata</label><input type="text" id="duration"></div>
 
-        <div class="toggle-group" style="display:flex; gap:20px; flex-wrap:wrap; grid-column: span 2;">
-            <div class="toggle-container">
-                <label class="switch"><input type="checkbox" id="isRitual"><span class="slider"></span></label>
-                <span>Rituale</span>
-            </div>
-            <div class="toggle-container">
-                <label class="switch"><input type="checkbox" id="isConcentration"><span class="slider"></span></label>
-                <span>Concentrazione</span>
-            </div>
+        <div style="grid-column: span 2; display: flex; gap: 20px;">
+            <div class="toggle-container"><label class="switch"><input type="checkbox" id="isRitual"><span class="slider"></span></label><span>Rituale</span></div>
+            <div class="toggle-container"><label class="switch"><input type="checkbox" id="isConcentration"><span class="slider"></span></label><span>Concentrazione</span></div>
         </div>
 
         <div class="field-group full-width">
-            <label>Classi (CTRL+Click per selezione multipla)</label>
-            <select id="classesSelect" multiple style="height: 120px;"></select>
+            <label>Classi (Seleziona più con CTRL)</label>
+            <select id="classesSelect" multiple style="height: 100px;"></select>
             <div style="margin-top:5px; display:flex; gap:10px;">
-                <input type="text" id="newClassName" placeholder="Nuova classe Homebrew...">
-                <button type="button" onclick="addNewClass()" style="background:var(--primary); color:white; border:none; padding:5px 15px; border-radius:4px;">+</button>
+                <input type="text" id="newClassName" placeholder="Aggiungi classe...">
+                <button type="button" onclick="addNewClass()" style="background:var(--primary); color:white; border:none; padding:5px 10px; border-radius:4px;">+</button>
             </div>
         </div>
 
         <div class="field-group full-width">
             <label>Componenti</label>
-            <div style="display:flex; gap:15px; align-items: center;">
+            <div style="display:flex; gap:15px;">
                 <label><input type="checkbox" id="compV"> V</label>
                 <label><input type="checkbox" id="compS"> S</label>
                 <label><input type="checkbox" id="compM" onchange="document.getElementById('mDet').style.display=this.checked?'block':'none'"> M</label>
-                <input type="text" id="mDet" placeholder="Materiali necessari..." style="display:none; flex:1">
+                <input type="text" id="mDet" placeholder="Materiali..." style="display:none; flex:1">
             </div>
         </div>
 
-        <textarea id="effectDesc" class="full-width" rows="4" placeholder="Descrizione incantesimo..."></textarea>
-        <textarea id="higherLevels" class="full-width" rows="2" placeholder="Ai livelli più alti..."></textarea>
-        
+        <textarea id="effectDesc" class="full-width" rows="4" placeholder="Descrizione..."></textarea>
+        <textarea id="higherLevels" class="full-width" rows="2" placeholder="Livelli superiori..."></textarea>
         <div class="field-group full-width">
-            <label>Immagine (Usata per riferimento visivo nella scheda)</label>
-            <input type="file" id="imgInput" accept="image/*" onchange="handleImg(event)">
-            <img id="imgPrev" style="max-height:100px; display:none; margin-top:10px;">
+            <label>Immagine</label>
+            <input type="file" id="imgInput" onchange="handleImg(event)">
         </div>
 
-        <button id="btnSubmit" class="btn-main" onclick="handleSubmit()">📜 Salva nel Compendio</button>
+        <button id="btnSubmit" class="btn-main" onclick="handleSubmit()">📜 Salva Incantesimo</button>
     </section>
 
-    <!-- FILTRI E RICERCA -->
+    <!-- CONTROLLI -->
     <div class="io-controls">
-        <div class="search-row">
-            <input type="text" id="searchBar" placeholder="🔍 Cerca nome o classe..." onkeyup="renderSpells()" style="flex:2; min-width: 200px;">
-            
-            <div class="field-group" style="flex:1; min-width: 150px;">
-                <select id="filterLevel" multiple onchange="renderSpells()" style="height: 80px;">
-                    <option value="0">Trucchetto</option>
-                    <script>for(let i=1; i<=9; i++) document.write(`<option value="${i}">${i}° Livello</option>`);</script>
-                </select>
-            </div>
-
-            <div style="display: flex; gap: 5px; flex-direction: column;">
-                <button onclick="exportJSON()" style="background:#2e7d32; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Esporta JSON</button>
-                <button onclick="document.getElementById('importFile').click()" style="background:#1565c0; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Importa JSON</button>
-                <input type="file" id="importFile" style="display:none" onchange="importJSON(event)">
-            </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <input type="text" id="searchBar" placeholder="🔍 Cerca nome o classe..." onkeyup="renderSpells()" style="flex:2">
+            <select id="filterLevel" multiple onchange="renderSpells()" style="height: 60px; flex:1">
+                <option value="0">Trucchetto</option>
+                <script>for(let i=1;i<=9;i++) document.write(`<option value="${i}">${i}° Livello</option>`);</script>
+            </select>
         </div>
-        <div class="filter-info">💡 Tieni premuto <b>CTRL</b> (o <b>CMD</b>) per selezionare più livelli contemporaneamente. Se non selezioni nulla, li mostra tutti.</div>
+        <div style="display:flex; gap:10px;">
+            <button onclick="exportJSON()" style="background:#2e7d32; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer;">Export</button>
+            <button onclick="document.getElementById('importFile').click()" style="background:#1565c0; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer;">Import</button>
+            <input type="file" id="importFile" style="display:none" onchange="importJSON(event)">
+        </div>
     </div>
 
     <div id="spellList" class="spell-grid"></div>
@@ -183,8 +157,9 @@
 
 <script>
     const CLASS_LIST = ["Artificiere", "Barbaro", "Bardo", "Chierico", "Druido", "Guerriero", "Ladro", "Mago", "Monaco", "Paladino", "Ranger", "Stregone", "Warlock"];
-    let spells = JSON.parse(localStorage.getItem('dnd_v6_spells')) || [];
-    let customClasses = JSON.parse(localStorage.getItem('dnd_v6_classes')) || [];
+    let spells = JSON.parse(localStorage.getItem('dnd_v7_spells')) || [];
+    let customClasses = JSON.parse(localStorage.getItem('dnd_v7_classes')) || [];
+    let pinnedIds = JSON.parse(localStorage.getItem('dnd_v7_pinned')) || [];
     let currentImg = "";
     let isEditing = false;
 
@@ -206,7 +181,7 @@
         let n = document.getElementById('newClassName').value.trim();
         if(n && !CLASS_LIST.includes(n) && !customClasses.includes(n)) {
             customClasses.push(n);
-            localStorage.setItem('dnd_v6_classes', JSON.stringify(customClasses));
+            localStorage.setItem('dnd_v7_classes', JSON.stringify(customClasses));
             renderClasses();
             document.getElementById('newClassName').value = '';
         }
@@ -214,8 +189,40 @@
 
     function handleImg(e) {
         let r = new FileReader();
-        r.onload = () => { currentImg = r.result; document.getElementById('imgPrev').src = r.result; document.getElementById('imgPrev').style.display='block'; };
+        r.onload = () => currentImg = r.result;
         if(e.target.files[0]) r.readAsDataURL(e.target.files[0]);
+    }
+
+    function togglePin(id) {
+        if(pinnedIds.includes(id)) {
+            pinnedIds = pinnedIds.filter(pid => pid !== id);
+        } else {
+            pinnedIds.push(id);
+        }
+        localStorage.setItem('dnd_v7_pinned', JSON.stringify(pinnedIds));
+        renderPinned();
+        renderSpells();
+    }
+
+    function renderPinned() {
+        const container = document.getElementById('pinnedContainer');
+        const section = document.getElementById('pinnedSection');
+        container.innerHTML = '';
+        
+        const pinnedSpells = spells.filter(s => pinnedIds.includes(s.id));
+        
+        if(pinnedSpells.length > 0) {
+            section.style.display = 'block';
+            pinnedSpells.forEach(s => {
+                const item = document.createElement('div');
+                item.className = 'pinned-item';
+                item.innerHTML = `<span>${s.nameIta}</span> <span class="unpin-btn" onclick="event.stopPropagation(); togglePin(${s.id})">×</span>`;
+                item.onclick = () => document.getElementById(`spell-${s.id}`).scrollIntoView({behavior: 'smooth'});
+                container.appendChild(item);
+            });
+        } else {
+            section.style.display = 'none';
+        }
     }
 
     function handleSubmit() {
@@ -237,41 +244,36 @@
             higherLevels: document.getElementById('higherLevels').value,
             image: currentImg
         };
-        if(!s.nameIta) return alert("Nome mancante!");
+        if(!s.nameIta) return alert("Inserisci il nome!");
         if(isEditing) { spells[spells.findIndex(x => x.id === id)] = s; } else { spells.push(s); }
-        localStorage.setItem('dnd_v6_spells', JSON.stringify(spells));
+        localStorage.setItem('dnd_v7_spells', JSON.stringify(spells));
         location.reload();
     }
 
     function renderSpells() {
         const list = document.getElementById('spellList');
         const query = document.getElementById('searchBar').value.toLowerCase();
-        // Prendi tutti i livelli selezionati come array di stringhe
         const selectedLevels = Array.from(document.getElementById('filterLevel').selectedOptions).map(o => o.value);
-        
         list.innerHTML = '';
+        
         spells.filter(s => {
             const matchesSearch = s.nameIta.toLowerCase().includes(query) || s.classes.some(c => c.toLowerCase().includes(query));
-            // Se non ci sono livelli selezionati, passano tutti. Altrimenti controlla se il livello è nell'elenco.
             const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(s.level);
             return matchesSearch && matchesLevel;
         }).forEach(s => {
+            const isPinned = pinnedIds.includes(s.id);
             let cStr = []; if(s.components.v) cStr.push('V'); if(s.components.s) cStr.push('S'); if(s.components.m) cStr.push('M');
             list.innerHTML += `
-                <div class="spell-card">
-                    ${s.image ? `<img src="${s.image}" style="width:100%; height:130px; object-fit:cover; border-radius:4px; margin-bottom:10px;">` : ''}
+                <div class="spell-card" id="spell-${s.id}">
+                    <button class="pin-card-btn ${isPinned ? 'active' : ''}" onclick="togglePin(${s.id})">📌</button>
+                    ${s.image ? `<img src="${s.image}" style="width:100%; height:120px; object-fit:cover; border-radius:4px; margin-bottom:10px;">` : ''}
                     <h3>${s.nameIta}</h3>
-                    <div style="font-style:italic; opacity:0.7; font-size:0.9em; margin-bottom:8px;">${s.nameEng || ''} ${s.isRitual ? '(Rituale)' : ''}</div>
-                    <div class="spell-meta-line">Livello ${s.level == '0' ? 'Trucchetto' : s.level} | ${s.school}</div>
-                    <div class="spell-meta-line"><b>Tempo:</b> ${s.castingTime} | <b>Gittata:</b> ${s.range}</div>
-                    <div class="spell-meta-line"><b>Durata:</b> ${s.isConcentration ? 'Concentrazione, ' : ''}${s.duration}</div>
-                    <div class="spell-meta-line"><b>Componenti:</b> ${cStr.join(', ')} ${s.components.m ? '('+s.components.mDet+')' : ''}</div>
-                    <div class="spell-meta-line"><b>Classi:</b> ${s.classes.join(', ')}</div>
-                    <p style="white-space: pre-wrap; font-size:0.95em;">${s.desc}</p>
-                    ${s.higherLevels ? `<div style="margin-top:10px; font-size:0.85em; background:rgba(0,0,0,0.05); padding:8px; border-radius:4px; border-left:3px solid var(--primary);"><b>Livelli Superiori:</b> ${s.higherLevels}</div>` : ''}
+                    <div class="spell-meta-line">Liv. ${s.level == '0' ? 'T' : s.level} | ${s.school}</div>
+                    <div class="spell-meta-line"><b>Lancio:</b> ${s.castingTime} | <b>Durata:</b> ${s.isConcentration ? 'Conc. ' : ''}${s.duration}</div>
+                    <p style="font-size:0.9em; white-space:pre-wrap;">${s.desc}</p>
                     <div class="card-actions">
-                        <button class="btn-edit" onclick="editSpell(${s.id})">Modifica</button>
-                        <button class="btn-delete" onclick="deleteSpell(${s.id})">Elimina</button>
+                        <button class="btn-edit" onclick="editSpell(${s.id})">Edit</button>
+                        <button class="btn-delete" onclick="deleteSpell(${s.id})">Del</button>
                     </div>
                 </div>`;
         });
@@ -282,40 +284,19 @@
         isEditing = true;
         document.getElementById('editId').value = s.id;
         document.getElementById('nameIta').value = s.nameIta;
-        document.getElementById('nameEng').value = s.nameEng;
-        document.getElementById('level').value = s.level;
-        document.getElementById('school').value = s.school;
-        document.getElementById('castingTime').value = s.castingTime;
-        document.getElementById('range').value = s.range;
-        document.getElementById('duration').value = s.duration;
-        document.getElementById('isRitual').checked = s.isRitual;
-        document.getElementById('isConcentration').checked = s.isConcentration;
-        document.getElementById('compV').checked = s.components.v;
-        document.getElementById('compS').checked = s.components.s;
-        document.getElementById('compM').checked = s.components.m;
-        document.getElementById('mDet').value = s.components.mDet || '';
-        document.getElementById('mDet').style.display = s.components.m ? 'block' : 'none';
         document.getElementById('effectDesc').value = s.desc;
-        document.getElementById('higherLevels').value = s.higherLevels;
-        Array.from(document.getElementById('classesSelect').options).forEach(opt => opt.selected = s.classes.includes(opt.value));
-        if(s.image) { currentImg = s.image; document.getElementById('imgPrev').src = s.image; document.getElementById('imgPrev').style.display='block'; }
-        document.getElementById('spellForm').classList.add('editing');
-        document.getElementById('btnSubmit').innerText = "💾 Aggiorna Incantesimo";
+        document.getElementById('btnSubmit').innerText = "💾 Aggiorna";
         window.scrollTo(0,0);
     }
 
-    function deleteSpell(id) { if(confirm("Sei sicuro?")) { spells = spells.filter(x => x.id !== id); localStorage.setItem('dnd_v6_spells', JSON.stringify(spells)); renderSpells(); } }
-    function exportJSON() {
-        const data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({spells, customClasses}));
-        const a = document.createElement('a'); a.href = data; a.download = "grimorio_homebrew.json"; a.click();
-    }
+    function deleteSpell(id) { if(confirm("Eliminare?")) { spells = spells.filter(x => x.id !== id); pinnedIds = pinnedIds.filter(pid => pid !== id); localStorage.setItem('dnd_v7_spells', JSON.stringify(spells)); localStorage.setItem('dnd_v7_pinned', JSON.stringify(pinnedIds)); renderPinned(); renderSpells(); } }
+    function exportJSON() { const data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({spells, customClasses, pinnedIds})); const a = document.createElement('a'); a.href = data; a.download = "compendio.json"; a.click(); }
     function importJSON(e) {
         let r = new FileReader();
         r.onload = (ev) => {
             let d = JSON.parse(ev.target.result);
-            spells = d.spells || d; customClasses = d.customClasses || [];
-            localStorage.setItem('dnd_v6_spells', JSON.stringify(spells));
-            localStorage.setItem('dnd_v6_classes', JSON.stringify(customClasses));
+            spells = d.spells; customClasses = d.customClasses || []; pinnedIds = d.pinnedIds || [];
+            localStorage.setItem('dnd_v7_spells', JSON.stringify(spells)); localStorage.setItem('dnd_v7_classes', JSON.stringify(customClasses)); localStorage.setItem('dnd_v7_pinned', JSON.stringify(pinnedIds));
             location.reload();
         };
         r.readAsText(e.target.files[0]);
@@ -323,6 +304,7 @@
 
     renderClasses();
     renderSpells();
+    renderPinned();
 </script>
 </body>
 </html>
