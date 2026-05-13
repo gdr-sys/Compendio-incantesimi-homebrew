@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compendio Incantesimi Homebrew</title>
+    <style>
+        :root {
+            --primary: #8b0000;
+            --secondary: #2c3e50;
+            --bg: #f4ece1;
+            --card-bg: #fffdfa;
+            --text: #332b21;
+            --accent: #bc9a70;
+            --edit-mode: #e3f2fd;
+        }
+
+        body { font-family: 'Palatino', 'Georgia', serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 1100px; margin: auto; }
+        h1 { text-align: center; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; }
+
+        /* Form */
+        .spell-form {
+            background: #e9decb; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;
+        }
+        .spell-form.editing { background: var(--edit-mode); border: 2px solid #1565c0; }
+        .spell-form input, .spell-form select, .spell-form textarea { padding: 10px; border: 1px solid var(--accent); border-radius: 4px; font-family: inherit; }
+        .full-width { grid-column: 1 / -1; }
+        
+        .image-preview-container { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; font-size: 0.9em; }
+        #imgPreview { height: 50px; width: 50px; object-fit: cover; border-radius: 4px; display: none; border: 1px solid var(--accent); }
+
+        .btn-main { background: var(--primary); color: white; padding: 12px; grid-column: 1 / -1; font-size: 1.1em; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+        .btn-main.editing { background: #1565c0; }
+
+        /* Filtri */
+        .filter-section { background: #dfd3bd; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        .filter-section input, .filter-section select { padding: 8px; border: 1px solid var(--accent); border-radius: 4px; }
+
+        /* Card */
+        .spell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .spell-card { background: var(--card-bg); border: 1px solid #d4c4a8; border-left: 6px solid var(--primary); padding: 20px; border-radius: 4px; display: flex; flex-direction: column; }
+        .spell-img { width: 100%; height: 150px; object-fit: cover; border-radius: 4px; margin-bottom: 10px; display: block; background: #eee; }
+        .spell-card h3 { margin: 0 0 10px 0; color: var(--primary); border-bottom: 1px solid #eee; }
+        .tag { display: inline-block; background: #eee; padding: 2px 8px; border-radius: 10px; font-size: 0.75em; margin-right: 5px; margin-bottom: 5px; border: 1px solid #ccc; }
+        .spell-desc { font-size: 0.95em; margin-top: 10px; white-space: pre-wrap; flex-grow: 1; }
+        .card-actions { margin-top: 15px; display: flex; gap: 10px; padding-top: 10px; border-top: 1px solid #eee; }
+        .btn-edit { background: #ff9800; color: white; flex: 1; padding: 5px; border-radius: 4px; border: none; cursor: pointer; }
+        .btn-delete { background: #f44336; color: white; flex: 1; padding: 5px; border-radius: 4px; border: none; cursor: pointer; }
+
+        .io-controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+        .btn-io { padding: 10px 20px; color: white; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📖 Compendio Incantesimi Homebrew</h1>
+
+    <section class="spell-form" id="spellForm">
+        <input type="hidden" id="editId">
+        <input type="text" id="spellName" placeholder="Nome Incantesimo">
+        <select id="spellLevel">
+            <option value="all">Livello...</option>
+            <option value="0">Trucchetto</option>
+            <option value="1">1°</option><option value="2">2°</option><option value="3">3°</option>
+            <option value="4">4°</option><option value="5">5°</option><option value="6">6°</option>
+            <option value="7">7°</option><option value="8">8°</option><option value="9">9°</option>
+        </select>
+        <input type="text" id="spellSchool" placeholder="Scuola">
+        <input type="text" id="spellClass" placeholder="Classi">
+        <input type="text" id="spellCasting" placeholder="Lancio">
+        
+        <div class="image-preview-container">
+            <label>🖼️ Immagine:</label>
+            <input type="file" id="spellImgInput" accept="image/*" onchange="previewImage(event)">
+            <img id="imgPreview" src="" alt="Preview">
+            <button type="button" onclick="clearImage()" id="btnClearImg" style="display:none; padding: 2px 5px;">Rimuovi</button>
+        </div>
+
+        <textarea id="spellDesc" class="full-width" rows="3" placeholder="Descrizione..."></textarea>
+        <button id="btnSubmit" class="btn-main" onclick="handleSubmit()">📜 Salva nel Compendio</button>
+    </section>
+
+    <section class="filter-section">
+        <input type="text" id="filterSearch" placeholder="Cerca Nome..." onkeyup="displaySpells()">
+        <select id="filterLevel" onchange="displaySpells()">
+            <option value="all">Tutti i livelli</option>
+            <option value="0">Trucchetto</option>
+            <option value="1">1°</option><option value="2">2°</option><option value="3">3°</option>
+            <!-- Aggiungi gli altri se necessario -->
+        </select>
+        <input type="text" id="filterClass" placeholder="Filtra Classe..." onkeyup="displaySpells()">
+    </section>
+
+    <div class="io-controls">
+        <button class="btn-io" style="background:#2e7d32" onclick="exportJSON()">💾 Esporta Tutto (JSON)</button>
+        <button class="btn-io" style="background:#1565c0" onclick="document.getElementById('importFile').click()">📂 Importa (JSON)</button>
+        <input type="file" id="importFile" style="display:none" onchange="importJSON(event)">
+    </div>
+
+    <div id="spellList" class="spell-grid"></div>
+</div>
+
+<script>
+    let spells = JSON.parse(localStorage.getItem('dnd_homebrew_v3')) || [];
+    let isEditing = false;
+    let currentBase64 = "";
+
+    // Funzione per convertire immagine in Base64
+    function previewImage(event) {
+        const reader = new FileReader();
+        reader.onload = function() {
+            currentBase64 = reader.result;
+            const preview = document.getElementById('imgPreview');
+            preview.src = currentBase64;
+            preview.style.display = "block";
+            document.getElementById('btnClearImg').style.display = "inline";
+        }
+        if(event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
+    }
+
+    function clearImage() {
+        currentBase64 = "";
+        document.getElementById('imgPreview').src = "";
+        document.getElementById('imgPreview').style.display = "none";
+        document.getElementById('btnClearImg').style.display = "none";
+        document.getElementById('spellImgInput').value = "";
+    }
+
+    function handleSubmit() {
+        const id = document.getElementById('editId').value;
+        const name = document.getElementById('spellName').value;
+        if(!name) return alert("Inserisci almeno il nome!");
+
+        const spellData = {
+            id: isEditing ? parseInt(id) : Date.now(),
+            name,
+            level: document.getElementById('spellLevel').value,
+            school: document.getElementById('spellSchool').value,
+            classes: document.getElementById('spellClass').value,
+            casting: document.getElementById('spellCasting').value,
+            desc: document.getElementById('spellDesc').value,
+            image: currentBase64
+        };
+
+        if(isEditing) {
+            const index = spells.findIndex(s => s.id == id);
+            spells[index] = spellData;
+        } else {
+            spells.push(spellData);
+        }
+
+        save();
+        resetForm();
+    }
+
+    function editSpell(id) {
+        const spell = spells.find(s => s.id === id);
+        isEditing = true;
+        document.getElementById('editId').value = spell.id;
+        document.getElementById('spellName').value = spell.name;
+        document.getElementById('spellLevel').value = spell.level;
+        document.getElementById('spellSchool').value = spell.school;
+        document.getElementById('spellClass').value = spell.classes;
+        document.getElementById('spellCasting').value = spell.casting;
+        document.getElementById('spellDesc').value = spell.desc;
+        
+        if(spell.image) {
+            currentBase64 = spell.image;
+            document.getElementById('imgPreview').src = spell.image;
+            document.getElementById('imgPreview').style.display = "block";
+            document.getElementById('btnClearImg').style.display = "inline";
+        } else {
+            clearImage();
+        }
+
+        document.getElementById('spellForm').classList.add('editing');
+        document.getElementById('btnSubmit').innerText = "💾 Aggiorna Incantesimo";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function save() {
+        localStorage.setItem('dnd_homebrew_v3', JSON.stringify(spells));
+        displaySpells();
+    }
+
+    function displaySpells() {
+        const list = document.getElementById('spellList');
+        const fName = document.getElementById('filterSearch').value.toLowerCase();
+        const fLevel = document.getElementById('filterLevel').value;
+        list.innerHTML = '';
+
+        spells.filter(s => (fLevel === 'all' || s.level === fLevel) && s.name.toLowerCase().includes(fName))
+        .forEach(s => {
+            const imgHtml = s.image ? `<img src="${s.image}" class="spell-img">` : '';
+            list.innerHTML += `
+                <div class="spell-card">
+                    ${imgHtml}
+                    <h3>${s.name}</h3>
+                    <div><span class="tag">${s.level == "0" ? "Trucchetto" : s.level + "° Liv"}</span><span class="tag">${s.school}</span></div>
+                    <div class="spell-desc">${s.desc}</div>
+                    <div class="card-actions">
+                        <button class="btn-edit" onclick="editSpell(${s.id})">Modifica</button>
+                        <button class="btn-delete" onclick="deleteSpell(${s.id})">Elimina</button>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function deleteSpell(id) {
+        if(confirm("Eliminare?")) { spells = spells.filter(s => s.id !== id); save(); }
+    }
+
+    function resetForm() {
+        isEditing = false;
+        document.getElementById('spellForm').classList.remove('editing');
+        document.getElementById('btnSubmit').innerText = "📜 Salva nel Compendio";
+        document.getElementById('editId').value = '';
+        document.getElementById('spellName').value = '';
+        document.getElementById('spellDesc').value = '';
+        clearImage();
+        displaySpells();
+    }
+
+    function exportJSON() {
+        const blob = new Blob([JSON.stringify(spells, null, 2)], {type : 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "compendio_completo.json";
+        a.click();
+    }
+
+    function importJSON(event) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if(confirm(`Importare ${data.length} incantesimi?`)) {
+                    spells = [...spells, ...data];
+                    save();
+                }
+            } catch(err) { alert("File non valido"); }
+        };
+        reader.readAsText(event.target.files[0]);
+    }
+
+    displaySpells();
+</script>
+</body>
+</html>
