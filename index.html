@@ -5,52 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compendio Incantesimi Homebrew Pro</title>
     <style>
-        /* DEFINIZIONE VARIABILI TEMA */
         :root[data-theme="light"] {
-            --primary: #8b0000;
-            --secondary: #2c3e50;
-            --bg: #f4ece1;
-            --card-bg: #fffdfa;
-            --text: #332b21;
-            --accent: #bc9a70;
-            --form-bg: #e9decb;
-            --edit-mode: #e3f2fd;
+            --primary: #8b0000; --secondary: #2c3e50; --bg: #f4ece1; --card-bg: #fffdfa;
+            --text: #332b21; --accent: #bc9a70; --form-bg: #e9decb; --edit-mode: #e3f2fd;
         }
-
         :root[data-theme="dark"] {
-            --primary: #ff4d4d;
-            --secondary: #bdc3c7;
-            --bg: #1a1a1a;
-            --card-bg: #2d2d2d;
-            --text: #e0e0e0;
-            --accent: #5d4a36;
-            --form-bg: #3d3d3d;
-            --edit-mode: #1a3a5a;
+            --primary: #ff4d4d; --secondary: #bdc3c7; --bg: #1a1a1a; --card-bg: #2d2d2d;
+            --text: #e0e0e0; --accent: #5d4a36; --form-bg: #3d3d3d; --edit-mode: #1a3a5a;
         }
-
         body { font-family: 'Palatino', 'Georgia', serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: all 0.3s; }
         .container { max-width: 1200px; margin: auto; }
-        
         header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); margin-bottom: 20px; }
         h1 { color: var(--primary); text-transform: uppercase; letter-spacing: 2px; }
-
-        /* Bottoni Tema */
         .theme-toggle { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
 
-        /* Form */
+        /* Form Styling */
         .spell-form {
             background: var(--form-bg); padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            margin-bottom: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;
+            margin-bottom: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;
         }
         .spell-form.editing { background: var(--edit-mode); border: 2px solid #1565c0; }
         .field-group { display: flex; flex-direction: column; gap: 5px; }
         .field-group label { font-size: 0.85em; font-weight: bold; color: var(--primary); }
-        
         input, select, textarea { background: var(--card-bg); color: var(--text); padding: 10px; border: 1px solid var(--accent); border-radius: 4px; font-family: inherit; }
         .full-width { grid-column: 1 / -1; }
 
-        /* Switch */
-        .toggle-container { display: flex; align-items: center; gap: 10px; font-size: 0.9em; padding: 10px 0; }
+        /* Toggles */
+        .toggle-container { display: flex; align-items: center; gap: 10px; font-size: 0.9em; padding: 5px 0; }
         .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
@@ -58,19 +39,21 @@
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        /* Card */
+        /* Controls Area */
+        .io-controls { background: var(--form-bg); padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .search-row { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+        .filter-info { font-size: 0.8em; opacity: 0.8; margin-top: -10px; }
+
+        /* Spell Cards */
         .spell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
-        .spell-card { background: var(--card-bg); border: 1px solid var(--accent); border-left: 8px solid var(--primary); padding: 25px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .spell-card h3 { margin: 0; color: var(--primary); font-size: 1.6em; }
-        .eng-name { font-style: italic; opacity: 0.7; font-size: 0.9em; margin-bottom: 10px; }
+        .spell-card { background: var(--card-bg); border: 1px solid var(--accent); border-left: 8px solid var(--primary); padding: 25px; border-radius: 4px; position: relative; }
+        .spell-card h3 { margin: 0; color: var(--primary); }
         .spell-meta-line { font-size: 0.9em; border-bottom: 1px solid var(--accent); padding: 5px 0; margin-bottom: 5px; }
         
         .btn-main { background: var(--primary); color: white; padding: 15px; grid-column: 1 / -1; font-size: 1.1em; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
         .card-actions { margin-top: 15px; display: flex; gap: 10px; }
         .btn-edit { background: #ff9800; color: white; flex: 1; padding: 8px; border: none; border-radius: 4px; cursor: pointer; }
         .btn-delete { background: #f44336; color: white; flex: 1; padding: 8px; border: none; border-radius: 4px; cursor: pointer; }
-
-        .io-controls { display: flex; gap: 10px; align-items: center; background: var(--form-bg); padding: 15px; border-radius: 8px; margin-bottom: 20px; flex-wrap: wrap; }
     </style>
 </head>
 <body>
@@ -81,16 +64,16 @@
         <button class="theme-toggle" onclick="toggleTheme()">🌓 Cambia Tema</button>
     </header>
 
-    <!-- FORM DI INSERIMENTO (Qui puoi mettere tutti i livelli) -->
+    <!-- FORM INSERIMENTO -->
     <section class="spell-form" id="spellForm">
         <input type="hidden" id="editId">
         <div class="field-group">
             <label>Nome (ITA)</label>
-            <input type="text" id="nameIta" placeholder="Es: Dardo Incantato">
+            <input type="text" id="nameIta" placeholder="Palla di Fuoco">
         </div>
         <div class="field-group">
             <label>Nome (ENG)</label>
-            <input type="text" id="nameEng">
+            <input type="text" id="nameEng" placeholder="Fireball">
         </div>
         <div class="field-group">
             <label>Livello</label>
@@ -100,12 +83,28 @@
             </select>
         </div>
         <div class="field-group">
-            <label>Scuola</label>
-            <input type="text" id="school" placeholder="Abiurazione">
+            <label>Scuola di Magia</label>
+            <select id="school">
+                <option value="Abiurazione">Abiurazione</option>
+                <option value="Ammaliamento">Ammaliamento</option>
+                <option value="Divinazione">Divinazione</option>
+                <option value="Evocazione">Evocazione</option>
+                <option value="Illusione">Illusione</option>
+                <option value="Invocazione">Invocazione</option>
+                <option value="Necromanzia">Necromanzia</option>
+                <option value="Trasmutazione">Trasmutazione</option>
+            </select>
         </div>
         <div class="field-group">
-            <label>Lancio</label>
-            <input type="text" id="castingTime" placeholder="1 azione">
+            <label>Tempo di Lancio</label>
+            <select id="castingTime">
+                <option value="1 azione">1 azione</option>
+                <option value="1 azione bonus">1 azione bonus</option>
+                <option value="1 reazione">1 reazione</option>
+                <option value="1 minuto">1 minuto</option>
+                <option value="10 minuti">10 minuti</option>
+                <option value="1 ora">1 ora</option>
+            </select>
         </div>
         <div class="field-group">
             <label>Gittata</label>
@@ -128,92 +127,97 @@
         </div>
 
         <div class="field-group full-width">
-            <label>Classi</label>
-            <select id="classesSelect" multiple style="height: 60px;"></select>
+            <label>Classi (CTRL+Click per selezione multipla)</label>
+            <select id="classesSelect" multiple style="height: 120px;"></select>
             <div style="margin-top:5px; display:flex; gap:10px;">
-                <input type="text" id="newClassName" placeholder="Aggiungi classe...">
+                <input type="text" id="newClassName" placeholder="Nuova classe Homebrew...">
                 <button type="button" onclick="addNewClass()" style="background:var(--primary); color:white; border:none; padding:5px 15px; border-radius:4px;">+</button>
             </div>
         </div>
 
         <div class="field-group full-width">
             <label>Componenti</label>
-            <div style="display:flex; gap:15px;">
+            <div style="display:flex; gap:15px; align-items: center;">
                 <label><input type="checkbox" id="compV"> V</label>
                 <label><input type="checkbox" id="compS"> S</label>
                 <label><input type="checkbox" id="compM" onchange="document.getElementById('mDet').style.display=this.checked?'block':'none'"> M</label>
-                <input type="text" id="mDet" placeholder="Materiali..." style="display:none; flex:1">
+                <input type="text" id="mDet" placeholder="Materiali necessari..." style="display:none; flex:1">
             </div>
         </div>
 
-        <textarea id="effectDesc" class="full-width" rows="4" placeholder="Descrizione effetto..."></textarea>
+        <textarea id="effectDesc" class="full-width" rows="4" placeholder="Descrizione incantesimo..."></textarea>
         <textarea id="higherLevels" class="full-width" rows="2" placeholder="Ai livelli più alti..."></textarea>
         
-        <input type="file" id="imgInput" accept="image/*" onchange="handleImg(event)" class="full-width">
-        <img id="imgPrev" style="max-height:100px; display:none; margin-top:10px;">
+        <div class="field-group full-width">
+            <label>Immagine (Usata per riferimento visivo nella scheda)</label>
+            <input type="file" id="imgInput" accept="image/*" onchange="handleImg(event)">
+            <img id="imgPrev" style="max-height:100px; display:none; margin-top:10px;">
+        </div>
 
-        <button id="btnSubmit" class="btn-main" onclick="handleSubmit()">📜 Salva Incantesimo</button>
+        <button id="btnSubmit" class="btn-main" onclick="handleSubmit()">📜 Salva nel Compendio</button>
     </section>
 
-    <!-- FILTRI (Limitati al Livello 3) -->
+    <!-- FILTRI E RICERCA -->
     <div class="io-controls">
-        <input type="text" id="searchBar" placeholder="🔍 Cerca..." onkeyup="renderSpells()" style="flex:2">
-        
-        <select id="filterLevel" onchange="renderSpells()" style="flex:1">
-            <option value="all">Tutti i Livelli (Fino al 3°)</option>
-            <option value="0">Trucchetto</option>
-            <option value="1">1° Livello</option>
-            <option value="2">2° Livello</option>
-            <option value="3">3° Livello</option>
-        </select>
+        <div class="search-row">
+            <input type="text" id="searchBar" placeholder="🔍 Cerca nome o classe..." onkeyup="renderSpells()" style="flex:2; min-width: 200px;">
+            
+            <div class="field-group" style="flex:1; min-width: 150px;">
+                <select id="filterLevel" multiple onchange="renderSpells()" style="height: 80px;">
+                    <option value="0">Trucchetto</option>
+                    <script>for(let i=1; i<=9; i++) document.write(`<option value="${i}">${i}° Livello</option>`);</script>
+                </select>
+            </div>
 
-        <button onclick="exportJSON()" style="background:#2e7d32; color:white; padding:10px;">Export</button>
-        <button onclick="document.getElementById('importFile').click()" style="background:#1565c0; color:white; padding:10px;">Import</button>
-        <input type="file" id="importFile" style="display:none" onchange="importJSON(event)">
+            <div style="display: flex; gap: 5px; flex-direction: column;">
+                <button onclick="exportJSON()" style="background:#2e7d32; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Esporta JSON</button>
+                <button onclick="document.getElementById('importFile').click()" style="background:#1565c0; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Importa JSON</button>
+                <input type="file" id="importFile" style="display:none" onchange="importJSON(event)">
+            </div>
+        </div>
+        <div class="filter-info">💡 Tieni premuto <b>CTRL</b> (o <b>CMD</b>) per selezionare più livelli contemporaneamente. Se non selezioni nulla, li mostra tutti.</div>
     </div>
 
     <div id="spellList" class="spell-grid"></div>
 </div>
 
 <script>
-    let spells = JSON.parse(localStorage.getItem('dnd_v4_spells')) || [];
-    let classes = JSON.parse(localStorage.getItem('dnd_v4_classes')) || ["Mago", "Chierico", "Guerriero", "Ladro"];
+    const CLASS_LIST = ["Artificiere", "Barbaro", "Bardo", "Chierico", "Druido", "Guerriero", "Ladro", "Mago", "Monaco", "Paladino", "Ranger", "Stregone", "Warlock"];
+    let spells = JSON.parse(localStorage.getItem('dnd_v6_spells')) || [];
+    let customClasses = JSON.parse(localStorage.getItem('dnd_v6_classes')) || [];
     let currentImg = "";
     let isEditing = false;
 
-    // TEMA
     function toggleTheme() {
         const root = document.documentElement;
-        const current = root.getAttribute('data-theme');
-        const next = current === 'light' ? 'dark' : 'light';
+        const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
         root.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);
     }
     if(localStorage.getItem('theme')) document.documentElement.setAttribute('data-theme', localStorage.getItem('theme'));
 
-    // CLASSI
     function renderClasses() {
         const sel = document.getElementById('classesSelect');
         sel.innerHTML = '';
-        classes.forEach(c => {
-            let o = new Option(c, c);
-            sel.add(o);
-        });
+        [...CLASS_LIST, ...customClasses].sort().forEach(c => sel.add(new Option(c, c)));
     }
 
     function addNewClass() {
         let n = document.getElementById('newClassName').value.trim();
-        if(n && !classes.includes(n)) { classes.push(n); localStorage.setItem('dnd_v4_classes', JSON.stringify(classes)); renderClasses(); }
+        if(n && !CLASS_LIST.includes(n) && !customClasses.includes(n)) {
+            customClasses.push(n);
+            localStorage.setItem('dnd_v6_classes', JSON.stringify(customClasses));
+            renderClasses();
+            document.getElementById('newClassName').value = '';
+        }
     }
 
-    // IMMAGINI
     function handleImg(e) {
         let r = new FileReader();
         r.onload = () => { currentImg = r.result; document.getElementById('imgPrev').src = r.result; document.getElementById('imgPrev').style.display='block'; };
         if(e.target.files[0]) r.readAsDataURL(e.target.files[0]);
     }
 
-    // SALVATAGGIO
     function handleSubmit() {
         const id = isEditing ? parseInt(document.getElementById('editId').value) : Date.now();
         const s = {
@@ -233,47 +237,43 @@
             higherLevels: document.getElementById('higherLevels').value,
             image: currentImg
         };
-
-        if(isEditing) { let i = spells.findIndex(x => x.id === id); spells[i] = s; } 
-        else { spells.push(s); }
-
-        localStorage.setItem('dnd_v4_spells', JSON.stringify(spells));
+        if(!s.nameIta) return alert("Nome mancante!");
+        if(isEditing) { spells[spells.findIndex(x => x.id === id)] = s; } else { spells.push(s); }
+        localStorage.setItem('dnd_v6_spells', JSON.stringify(spells));
         location.reload();
     }
 
-    // RENDERING CON FILTRO FINO AL LIVELLO 3
     function renderSpells() {
         const list = document.getElementById('spellList');
         const query = document.getElementById('searchBar').value.toLowerCase();
-        const fLev = document.getElementById('filterLevel').value;
+        // Prendi tutti i livelli selezionati come array di stringhe
+        const selectedLevels = Array.from(document.getElementById('filterLevel').selectedOptions).map(o => o.value);
         
         list.innerHTML = '';
-
         spells.filter(s => {
-            const matchesSearch = s.nameIta.toLowerCase().includes(query);
-            // Logica filtro: se "all", mostra solo fino al 3. Se specifico, mostra quello.
-            const sLevel = parseInt(s.level);
-            const matchesLevel = (fLev === 'all') ? (sLevel <= 3) : (s.level === fLev);
-            
+            const matchesSearch = s.nameIta.toLowerCase().includes(query) || s.classes.some(c => c.toLowerCase().includes(query));
+            // Se non ci sono livelli selezionati, passano tutti. Altrimenti controlla se il livello è nell'elenco.
+            const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(s.level);
             return matchesSearch && matchesLevel;
         }).forEach(s => {
             let cStr = []; if(s.components.v) cStr.push('V'); if(s.components.s) cStr.push('S'); if(s.components.m) cStr.push('M');
             list.innerHTML += `
                 <div class="spell-card">
-                    ${s.image ? `<img src="${s.image}" style="width:100%; height:120px; object-fit:cover; border-radius:4px;">` : ''}
+                    ${s.image ? `<img src="${s.image}" style="width:100%; height:130px; object-fit:cover; border-radius:4px; margin-bottom:10px;">` : ''}
                     <h3>${s.nameIta}</h3>
-                    <div class="eng-name">${s.nameEng || ''} ${s.isRitual ? '(Rituale)' : ''}</div>
-                    <div class="spell-meta-line">Livello ${s.level} | ${s.school}</div>
-                    <div class="spell-meta-line"><b>Lancio:</b> ${s.castingTime} | <b>Gittata:</b> ${s.range}</div>
+                    <div style="font-style:italic; opacity:0.7; font-size:0.9em; margin-bottom:8px;">${s.nameEng || ''} ${s.isRitual ? '(Rituale)' : ''}</div>
+                    <div class="spell-meta-line">Livello ${s.level == '0' ? 'Trucchetto' : s.level} | ${s.school}</div>
+                    <div class="spell-meta-line"><b>Tempo:</b> ${s.castingTime} | <b>Gittata:</b> ${s.range}</div>
                     <div class="spell-meta-line"><b>Durata:</b> ${s.isConcentration ? 'Concentrazione, ' : ''}${s.duration}</div>
                     <div class="spell-meta-line"><b>Componenti:</b> ${cStr.join(', ')} ${s.components.m ? '('+s.components.mDet+')' : ''}</div>
-                    <p>${s.desc}</p>
+                    <div class="spell-meta-line"><b>Classi:</b> ${s.classes.join(', ')}</div>
+                    <p style="white-space: pre-wrap; font-size:0.95em;">${s.desc}</p>
+                    ${s.higherLevels ? `<div style="margin-top:10px; font-size:0.85em; background:rgba(0,0,0,0.05); padding:8px; border-radius:4px; border-left:3px solid var(--primary);"><b>Livelli Superiori:</b> ${s.higherLevels}</div>` : ''}
                     <div class="card-actions">
                         <button class="btn-edit" onclick="editSpell(${s.id})">Modifica</button>
                         <button class="btn-delete" onclick="deleteSpell(${s.id})">Elimina</button>
                     </div>
-                </div>
-            `;
+                </div>`;
         });
     }
 
@@ -282,33 +282,43 @@
         isEditing = true;
         document.getElementById('editId').value = s.id;
         document.getElementById('nameIta').value = s.nameIta;
+        document.getElementById('nameEng').value = s.nameEng;
         document.getElementById('level').value = s.level;
+        document.getElementById('school').value = s.school;
+        document.getElementById('castingTime').value = s.castingTime;
+        document.getElementById('range').value = s.range;
+        document.getElementById('duration').value = s.duration;
+        document.getElementById('isRitual').checked = s.isRitual;
+        document.getElementById('isConcentration').checked = s.isConcentration;
+        document.getElementById('compV').checked = s.components.v;
+        document.getElementById('compS').checked = s.components.s;
+        document.getElementById('compM').checked = s.components.m;
+        document.getElementById('mDet').value = s.components.mDet || '';
+        document.getElementById('mDet').style.display = s.components.m ? 'block' : 'none';
         document.getElementById('effectDesc').value = s.desc;
+        document.getElementById('higherLevels').value = s.higherLevels;
+        Array.from(document.getElementById('classesSelect').options).forEach(opt => opt.selected = s.classes.includes(opt.value));
+        if(s.image) { currentImg = s.image; document.getElementById('imgPrev').src = s.image; document.getElementById('imgPrev').style.display='block'; }
         document.getElementById('spellForm').classList.add('editing');
+        document.getElementById('btnSubmit').innerText = "💾 Aggiorna Incantesimo";
         window.scrollTo(0,0);
     }
 
-    function deleteSpell(id) { if(confirm("Eliminare?")) { spells = spells.filter(x => x.id !== id); localStorage.setItem('dnd_v4_spells', JSON.stringify(spells)); renderSpells(); } }
-
+    function deleteSpell(id) { if(confirm("Sei sicuro?")) { spells = spells.filter(x => x.id !== id); localStorage.setItem('dnd_v6_spells', JSON.stringify(spells)); renderSpells(); } }
     function exportJSON() {
-        const data = encodeURIComponent(JSON.stringify({spells, classes}));
-        const a = document.createElement('a');
-        a.href = "data:text/json;charset=utf-8," + data;
-        a.download = "compendio.json";
-        a.click();
+        const data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({spells, customClasses}));
+        const a = document.createElement('a'); a.href = data; a.download = "grimorio_homebrew.json"; a.click();
     }
-
     function importJSON(e) {
-        let f = e.target.files[0];
         let r = new FileReader();
         r.onload = (ev) => {
             let d = JSON.parse(ev.target.result);
-            spells = d.spells; classes = d.classes;
-            localStorage.setItem('dnd_v4_spells', JSON.stringify(spells));
-            localStorage.setItem('dnd_v4_classes', JSON.stringify(classes));
-            renderSpells(); renderClasses();
+            spells = d.spells || d; customClasses = d.customClasses || [];
+            localStorage.setItem('dnd_v6_spells', JSON.stringify(spells));
+            localStorage.setItem('dnd_v6_classes', JSON.stringify(customClasses));
+            location.reload();
         };
-        r.readAsText(f);
+        r.readAsText(e.target.files[0]);
     }
 
     renderClasses();
