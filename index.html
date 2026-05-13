@@ -3,308 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compendio Incantesimi Homebrew Pro</title>
+    <title>Grimorio Pro - Print Manager</title>
     <style>
         :root[data-theme="light"] {
-            --primary: #8b0000; --secondary: #2c3e50; --bg: #f4ece1; --card-bg: #fffdfa;
-            --text: #332b21; --accent: #bc9a70; --form-bg: #e9decb; --edit-mode: #e3f2fd; --pin-bg: #d4c4a8;
+            --primary: #8b0000; --bg: #f4ece1; --card-bg: #fffdfa;
+            --text: #332b21; --accent: #bc9a70; --form-bg: #e9decb;
         }
         :root[data-theme="dark"] {
-            --primary: #ff4d4d; --secondary: #bdc3c7; --bg: #1a1a1a; --card-bg: #2d2d2d;
-            --text: #e0e0e0; --accent: #5d4a36; --form-bg: #3d3d3d; --edit-mode: #1a3a5a; --pin-bg: #4a3f35;
+            --primary: #ff4d4d; --bg: #1a1a1a; --card-bg: #2d2d2d;
+            --text: #e0e0e0; --accent: #5d4a36; --form-bg: #3d3d3d;
         }
-        body { font-family: 'Palatino', 'Georgia', serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: all 0.3s; scroll-behavior: smooth; }
+        body { font-family: 'Palatino', serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         .container { max-width: 1200px; margin: auto; }
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); margin-bottom: 20px; }
-        h1 { color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin: 10px 0; }
         
-        /* Sezione Pin */
-        .pinned-section { background: var(--pin-bg); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px dashed var(--primary); }
-        .pinned-section h2 { font-size: 1.1em; margin-top: 0; color: var(--primary); text-transform: uppercase; }
-        .pinned-container { display: flex; flex-wrap: wrap; gap: 10px; }
-        .pinned-item { 
-            background: var(--card-bg); padding: 8px 15px; border-radius: 20px; border: 1px solid var(--primary); 
-            cursor: pointer; font-weight: bold; font-size: 0.9em; display: flex; align-items: center; gap: 8px;
-            transition: transform 0.2s;
+        /* Pannello Stampa Rapida */
+        .print-manager {
+            position: sticky; top: 10px; z-index: 100;
+            background: var(--primary); color: white; padding: 15px;
+            border-radius: 8px; margin-bottom: 20px; display: flex;
+            justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .pinned-item:hover { transform: translateY(-2px); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .unpin-btn { color: var(--primary); cursor: pointer; font-size: 1.2em; line-height: 1; }
 
-        /* Form e altri stili */
-        .spell-form {
-            background: var(--form-bg); padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            margin-bottom: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;
+        /* Griglia UI */
+        .spell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .spell-card { 
+            background: var(--card-bg); border: 1px solid var(--accent); 
+            border-left: 8px solid var(--primary); padding: 15px; border-radius: 4px;
         }
-        .field-group { display: flex; flex-direction: column; gap: 5px; }
-        input, select, textarea { background: var(--card-bg); color: var(--text); padding: 10px; border: 1px solid var(--accent); border-radius: 4px; font-family: inherit; }
-        .full-width { grid-column: 1 / -1; }
-        
-        .toggle-container { display: flex; align-items: center; gap: 10px; font-size: 0.9em; padding: 5px 0; }
-        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
-        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--primary); }
-        input:checked + .slider:before { transform: translateX(20px); }
 
-        .spell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
-        .spell-card { background: var(--card-bg); border: 1px solid var(--accent); border-left: 8px solid var(--primary); padding: 25px; border-radius: 4px; position: relative; }
-        .pin-card-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.4em; cursor: pointer; filter: grayscale(1); }
-        .pin-card-btn.active { filter: grayscale(0); }
+        .btn-add-print { background: #2e7d32; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-add-print.active { background: #c62828; }
 
-        .btn-main { background: var(--primary); color: white; padding: 15px; grid-column: 1 / -1; font-size: 1.1em; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
-        .io-controls { background: var(--form-bg); padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .card-actions { margin-top: 15px; display: flex; gap: 10px; }
-        .btn-edit { background: #ff9800; color: white; flex: 1; padding: 8px; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-delete { background: #f44336; color: white; flex: 1; padding: 8px; border: none; border-radius: 4px; cursor: pointer; }
+        /* --- LOGICA DI STAMPA PDF --- */
+        @media print {
+            @page { size: A4; margin: 1cm; }
+            body * { visibility: hidden; }
+            #print-ready-zone, #print-ready-zone * { visibility: visible; }
+            #print-ready-zone {
+                position: absolute; left: 0; top: 0; width: 100%;
+                display: grid !important; grid-template-columns: repeat(3, 6.35cm);
+                gap: 0.5cm; justify-content: center;
+            }
+            .print-card {
+                width: 6.35cm; height: 8.89cm; border: 1px solid #333;
+                padding: 10px; box-sizing: border-box; background: white !important;
+                color: black !important; overflow: hidden; position: relative;
+            }
+            .print-card h3 { font-size: 11pt; margin: 0; border-bottom: 1px solid #8b0000; color: #8b0000 !important; }
+            .print-card .meta { font-size: 7pt; font-style: italic; margin: 3px 0; }
+            .print-card .desc { font-size: 8pt; line-height: 1.1; }
+            .no-print { display: none !important; }
+        }
+
+        #print-ready-zone { display: none; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>📖 Grimorio Homebrew</h1>
-        <button class="theme-toggle" onclick="toggleTheme()">🌓 Tema</button>
-    </header>
-
-    <!-- SEZIONE PINNATI -->
-    <div class="pinned-section" id="pinnedSection" style="display: none;">
-        <h2>📌 Incantesimi Preparati</h2>
-        <div class="pinned-container" id="pinnedContainer"></div>
+<div class="container no-print">
+    <div class="print-manager">
+        <div>
+            <strong>🖨️ Coda di Stampa:</strong> 
+            <span id="print-count">0</span> incantesimi selezionati
+        </div>
+        <button onclick="prepareAndPrint()" style="background: white; color: var(--primary); border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">
+            Genera Foglio di Stampa
+        </button>
     </div>
 
-    <!-- FORM INSERIMENTO -->
-    <section class="spell-form" id="spellForm">
-        <input type="hidden" id="editId">
-        <div class="field-group"><label>Nome (ITA)</label><input type="text" id="nameIta"></div>
-        <div class="field-group"><label>Nome (ENG)</label><input type="text" id="nameEng"></div>
-        <div class="field-group">
-            <label>Livello</label>
-            <select id="level">
-                <option value="0">Trucchetto</option>
-                <script>for(let i=1;i<=9;i++) document.write(`<option value="${i}">${i}° Livello</option>`)</script>
-            </select>
-        </div>
-        <div class="field-group">
-            <label>Scuola</label>
-            <select id="school">
-                <option>Abiurazione</option><option>Ammaliamento</option><option>Divinazione</option><option>Evocazione</option>
-                <option>Illusione</option><option>Invocazione</option><option>Necromanzia</option><option>Trasmutazione</option>
-            </select>
-        </div>
-        <div class="field-group">
-            <label>Lancio</label>
-            <select id="castingTime">
-                <option>1 azione</option><option>1 azione bonus</option><option>1 reazione</option>
-                <option>1 minuto</option><option>10 minuti</option><option>1 ora</option>
-            </select>
-        </div>
-        <div class="field-group"><label>Gittata</label><input type="text" id="range"></div>
-        <div class="field-group"><label>Durata</label><input type="text" id="duration"></div>
+    <header>
+        <h1>📖 Grimorio Homebrew</h1>
+    </header>
 
-        <div style="grid-column: span 2; display: flex; gap: 20px;">
-            <div class="toggle-container"><label class="switch"><input type="checkbox" id="isRitual"><span class="slider"></span></label><span>Rituale</span></div>
-            <div class="toggle-container"><label class="switch"><input type="checkbox" id="isConcentration"><span class="slider"></span></label><span>Concentrazione</span></div>
-        </div>
-
-        <div class="field-group full-width">
-            <label>Classi (Seleziona più con CTRL)</label>
-            <select id="classesSelect" multiple style="height: 100px;"></select>
-            <div style="margin-top:5px; display:flex; gap:10px;">
-                <input type="text" id="newClassName" placeholder="Aggiungi classe...">
-                <button type="button" onclick="addNewClass()" style="background:var(--primary); color:white; border:none; padding:5px 10px; border-radius:4px;">+</button>
-            </div>
-        </div>
-
-        <div class="field-group full-width">
-            <label>Componenti</label>
-            <div style="display:flex; gap:15px;">
-                <label><input type="checkbox" id="compV"> V</label>
-                <label><input type="checkbox" id="compS"> S</label>
-                <label><input type="checkbox" id="compM" onchange="document.getElementById('mDet').style.display=this.checked?'block':'none'"> M</label>
-                <input type="text" id="mDet" placeholder="Materiali..." style="display:none; flex:1">
-            </div>
-        </div>
-
-        <textarea id="effectDesc" class="full-width" rows="4" placeholder="Descrizione..."></textarea>
-        <textarea id="higherLevels" class="full-width" rows="2" placeholder="Livelli superiori..."></textarea>
-        <div class="field-group full-width">
-            <label>Immagine</label>
-            <input type="file" id="imgInput" onchange="handleImg(event)">
-        </div>
-
-        <button id="btnSubmit" class="btn-main" onclick="handleSubmit()">📜 Salva Incantesimo</button>
-    </section>
-
-    <!-- CONTROLLI -->
     <div class="io-controls">
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <input type="text" id="searchBar" placeholder="🔍 Cerca nome o classe..." onkeyup="renderSpells()" style="flex:2">
-            <select id="filterLevel" multiple onchange="renderSpells()" style="height: 60px; flex:1">
-                <option value="0">Trucchetto</option>
-                <script>for(let i=1;i<=9;i++) document.write(`<option value="${i}">${i}° Livello</option>`);</script>
-            </select>
-        </div>
-        <div style="display:flex; gap:10px;">
-            <button onclick="exportJSON()" style="background:#2e7d32; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer;">Export</button>
-            <button onclick="document.getElementById('importFile').click()" style="background:#1565c0; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer;">Import</button>
-            <input type="file" id="importFile" style="display:none" onchange="importJSON(event)">
-        </div>
+        <input type="text" id="searchBar" placeholder="🔍 Filtra incantesimi..." onkeyup="renderSpells()" style="width:100%; padding:10px;">
     </div>
 
     <div id="spellList" class="spell-grid"></div>
 </div>
 
+<!-- Area nascosta che si attiva solo durante la stampa -->
+<div id="print-ready-zone"></div>
+
 <script>
-    const CLASS_LIST = ["Artificiere", "Barbaro", "Bardo", "Chierico", "Druido", "Guerriero", "Ladro", "Mago", "Monaco", "Paladino", "Ranger", "Stregone", "Warlock"];
     let spells = JSON.parse(localStorage.getItem('dnd_v7_spells')) || [];
-    let customClasses = JSON.parse(localStorage.getItem('dnd_v7_classes')) || [];
-    let pinnedIds = JSON.parse(localStorage.getItem('dnd_v7_pinned')) || [];
-    let currentImg = "";
-    let isEditing = false;
+    let printQueue = [];
 
-    function toggleTheme() {
-        const root = document.documentElement;
-        const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-        root.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
-    }
-    if(localStorage.getItem('theme')) document.documentElement.setAttribute('data-theme', localStorage.getItem('theme'));
-
-    function renderClasses() {
-        const sel = document.getElementById('classesSelect');
-        sel.innerHTML = '';
-        [...CLASS_LIST, ...customClasses].sort().forEach(c => sel.add(new Option(c, c)));
-    }
-
-    function addNewClass() {
-        let n = document.getElementById('newClassName').value.trim();
-        if(n && !CLASS_LIST.includes(n) && !customClasses.includes(n)) {
-            customClasses.push(n);
-            localStorage.setItem('dnd_v7_classes', JSON.stringify(customClasses));
-            renderClasses();
-            document.getElementById('newClassName').value = '';
-        }
-    }
-
-    function handleImg(e) {
-        let r = new FileReader();
-        r.onload = () => currentImg = r.result;
-        if(e.target.files[0]) r.readAsDataURL(e.target.files[0]);
-    }
-
-    function togglePin(id) {
-        if(pinnedIds.includes(id)) {
-            pinnedIds = pinnedIds.filter(pid => pid !== id);
+    function togglePrintQueue(id) {
+        const index = printQueue.indexOf(id);
+        if (index > -1) {
+            printQueue.splice(index, 1);
         } else {
-            pinnedIds.push(id);
+            printQueue.push(id);
         }
-        localStorage.setItem('dnd_v7_pinned', JSON.stringify(pinnedIds));
-        renderPinned();
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('print-count').innerText = printQueue.length;
         renderSpells();
-    }
-
-    function renderPinned() {
-        const container = document.getElementById('pinnedContainer');
-        const section = document.getElementById('pinnedSection');
-        container.innerHTML = '';
-        
-        const pinnedSpells = spells.filter(s => pinnedIds.includes(s.id));
-        
-        if(pinnedSpells.length > 0) {
-            section.style.display = 'block';
-            pinnedSpells.forEach(s => {
-                const item = document.createElement('div');
-                item.className = 'pinned-item';
-                item.innerHTML = `<span>${s.nameIta}</span> <span class="unpin-btn" onclick="event.stopPropagation(); togglePin(${s.id})">×</span>`;
-                item.onclick = () => document.getElementById(`spell-${s.id}`).scrollIntoView({behavior: 'smooth'});
-                container.appendChild(item);
-            });
-        } else {
-            section.style.display = 'none';
-        }
-    }
-
-    function handleSubmit() {
-        const id = isEditing ? parseInt(document.getElementById('editId').value) : Date.now();
-        const s = {
-            id,
-            nameIta: document.getElementById('nameIta').value,
-            nameEng: document.getElementById('nameEng').value,
-            level: document.getElementById('level').value,
-            school: document.getElementById('school').value,
-            castingTime: document.getElementById('castingTime').value,
-            range: document.getElementById('range').value,
-            duration: document.getElementById('duration').value,
-            isRitual: document.getElementById('isRitual').checked,
-            isConcentration: document.getElementById('isConcentration').checked,
-            classes: Array.from(document.getElementById('classesSelect').selectedOptions).map(o => o.value),
-            components: { v: document.getElementById('compV').checked, s: document.getElementById('compS').checked, m: document.getElementById('compM').checked, mDet: document.getElementById('mDet').value },
-            desc: document.getElementById('effectDesc').value,
-            higherLevels: document.getElementById('higherLevels').value,
-            image: currentImg
-        };
-        if(!s.nameIta) return alert("Inserisci il nome!");
-        if(isEditing) { spells[spells.findIndex(x => x.id === id)] = s; } else { spells.push(s); }
-        localStorage.setItem('dnd_v7_spells', JSON.stringify(spells));
-        location.reload();
     }
 
     function renderSpells() {
         const list = document.getElementById('spellList');
         const query = document.getElementById('searchBar').value.toLowerCase();
-        const selectedLevels = Array.from(document.getElementById('filterLevel').selectedOptions).map(o => o.value);
         list.innerHTML = '';
-        
-        spells.filter(s => {
-            const matchesSearch = s.nameIta.toLowerCase().includes(query) || s.classes.some(c => c.toLowerCase().includes(query));
-            const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(s.level);
-            return matchesSearch && matchesLevel;
-        }).forEach(s => {
-            const isPinned = pinnedIds.includes(s.id);
-            let cStr = []; if(s.components.v) cStr.push('V'); if(s.components.s) cStr.push('S'); if(s.components.m) cStr.push('M');
+
+        spells.filter(s => s.nameIta.toLowerCase().includes(query)).forEach(s => {
+            const isSelected = printQueue.includes(s.id);
             list.innerHTML += `
-                <div class="spell-card" id="spell-${s.id}">
-                    <button class="pin-card-btn ${isPinned ? 'active' : ''}" onclick="togglePin(${s.id})">📌</button>
-                    ${s.image ? `<img src="${s.image}" style="width:100%; height:120px; object-fit:cover; border-radius:4px; margin-bottom:10px;">` : ''}
+                <div class="spell-card">
                     <h3>${s.nameIta}</h3>
-                    <div class="spell-meta-line">Liv. ${s.level == '0' ? 'T' : s.level} | ${s.school}</div>
-                    <div class="spell-meta-line"><b>Lancio:</b> ${s.castingTime} | <b>Durata:</b> ${s.isConcentration ? 'Conc. ' : ''}${s.duration}</div>
-                    <p style="font-size:0.9em; white-space:pre-wrap;">${s.desc}</p>
-                    <div class="card-actions">
-                        <button class="btn-edit" onclick="editSpell(${s.id})">Edit</button>
-                        <button class="btn-delete" onclick="deleteSpell(${s.id})">Del</button>
-                    </div>
+                    <p style="font-size:0.85em; opacity:0.8;">${s.desc.substring(0, 100)}...</p>
+                    <button class="btn-add-print ${isSelected ? 'active' : ''}" onclick="togglePrintQueue(${s.id})">
+                        ${isSelected ? '❌ Rimuovi dalla stampa' : '➕ Aggiungi alla stampa'}
+                    </button>
                 </div>`;
         });
     }
 
-    function editSpell(id) {
-        const s = spells.find(x => x.id === id);
-        isEditing = true;
-        document.getElementById('editId').value = s.id;
-        document.getElementById('nameIta').value = s.nameIta;
-        document.getElementById('effectDesc').value = s.desc;
-        document.getElementById('btnSubmit').innerText = "💾 Aggiorna";
-        window.scrollTo(0,0);
+    function prepareAndPrint() {
+        if (printQueue.length === 0) return alert("Seleziona almeno un incantesimo!");
+
+        const zone = document.getElementById('print-ready-zone');
+        zone.innerHTML = '';
+
+        printQueue.forEach(id => {
+            const s = spells.find(x => x.id === id);
+            zone.innerHTML += `
+                <div class="print-card">
+                    <h3>${s.nameIta}</h3>
+                    <div class="meta">Livello ${s.level || '0'} | ${s.school || 'Scuola'}</div>
+                    <div class="desc">${s.desc}</div>
+                </div>`;
+        });
+
+        window.print();
     }
 
-    function deleteSpell(id) { if(confirm("Eliminare?")) { spells = spells.filter(x => x.id !== id); pinnedIds = pinnedIds.filter(pid => pid !== id); localStorage.setItem('dnd_v7_spells', JSON.stringify(spells)); localStorage.setItem('dnd_v7_pinned', JSON.stringify(pinnedIds)); renderPinned(); renderSpells(); } }
-    function exportJSON() { const data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({spells, customClasses, pinnedIds})); const a = document.createElement('a'); a.href = data; a.download = "compendio.json"; a.click(); }
-    function importJSON(e) {
-        let r = new FileReader();
-        r.onload = (ev) => {
-            let d = JSON.parse(ev.target.result);
-            spells = d.spells; customClasses = d.customClasses || []; pinnedIds = d.pinnedIds || [];
-            localStorage.setItem('dnd_v7_spells', JSON.stringify(spells)); localStorage.setItem('dnd_v7_classes', JSON.stringify(customClasses)); localStorage.setItem('dnd_v7_pinned', JSON.stringify(pinnedIds));
-            location.reload();
-        };
-        r.readAsText(e.target.files[0]);
+    // Dati di esempio se vuoto
+    if(spells.length === 0) {
+        spells = [
+            {id: 1, nameIta: "Dardo Incantato", desc: "Crei tre dardi luminosi di forza magica. Ogni dardo colpisce una creatura a tua scelta che tu possa vedere entro la gittata. Un dardo infligge 1d4 + 1 danni da forza al suo bersaglio.", level: "1", school: "Invocazione"},
+            {id: 2, nameIta: "Palla di Fuoco", desc: "Un fascio di luce scarlatta scaturisce dal tuo dito indice verso un punto scelto entro la gittata e poi esplode in una deflagrazione di fiamme.", level: "3", school: "Invocazione"}
+        ];
     }
 
-    renderClasses();
     renderSpells();
-    renderPinned();
 </script>
 </body>
 </html>
