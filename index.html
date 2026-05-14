@@ -15,33 +15,25 @@
         }
         body { font-family: 'Palatino', serif; background-color: var(--bg); color: var(--text); padding: 20px; transition: 0.3s; scroll-behavior: smooth; }
         .container { max-width: 1200px; margin: auto; }
-        
         header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--primary); margin-bottom: 25px; }
         
-        /* Pannello Pin */
         .pin-panel { background: var(--pin-bg); padding: 15px; border-radius: 8px; border: 1px dashed var(--primary); margin-bottom: 20px; }
         .pin-tag { background: var(--card-bg); padding: 5px 12px; border-radius: 20px; margin: 4px; display: inline-block; border: 1px solid var(--primary); cursor: pointer; font-size: 0.85em; }
 
-        /* Form e Input */
-        .spell-form {
-            background: var(--form-bg); padding: 25px; border-radius: 8px; 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;
-        }
+        .spell-form { background: var(--form-bg); padding: 25px; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .full-width { grid-column: 1 / -1; }
         input, select, textarea { padding: 10px; border: 1px solid var(--accent); border-radius: 4px; background: var(--card-bg); color: var(--text); font-family: inherit; }
-        select[multiple] { height: 100px; }
+        
+        .checkbox-group { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 4px; }
+        .material-input { display: none; margin-top: 10px; }
 
-        /* Filtri Avanzati */
-        .filter-section { 
-            background: var(--form-bg); padding: 15px; border-radius: 8px; margin-bottom: 25px;
-            display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 15px; align-items: end;
-        }
-        .filter-label { font-size: 0.8em; font-weight: bold; margin-bottom: 5px; display: block; color: var(--primary); }
-
-        /* Card */
-        .spell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
+        .spell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 25px; }
         .spell-card { background: var(--card-bg); border: 1px solid var(--accent); border-left: 8px solid var(--primary); padding: 20px; border-radius: 4px; position: relative; }
         .spell-img { width: 100%; height: 160px; object-fit: cover; border-radius: 4px; margin-bottom: 10px; border: 1px solid var(--accent); }
+
+        .tag-ritual { color: #2e7d32; font-weight: bold; font-style: italic; }
+        .tag-conc { color: #1565c0; font-weight: bold; }
+        .higher-levels { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--accent); font-size: 0.85em; font-style: italic; }
 
         .btn { cursor: pointer; border: none; border-radius: 4px; padding: 10px 15px; font-weight: bold; }
         .btn-main { background: var(--primary); color: white; }
@@ -49,11 +41,9 @@
         @media print {
             body * { visibility: hidden; }
             #print-zone, #print-zone * { visibility: visible; }
-            #print-zone {
-                position: absolute; left: 0; top: 0; width: 100%;
-                display: grid !important; grid-template-columns: repeat(3, 6.35cm); gap: 0.4cm; justify-content: center;
-            }
-            .print-card { width: 6.35cm; height: 8.89cm; border: 1px solid #000; padding: 10px; box-sizing: border-box; background: white !important; color: black !important; font-size: 8pt; overflow: hidden; }
+            #print-zone { position: absolute; left: 0; top: 0; width: 100%; display: grid !important; grid-template-columns: repeat(3, 6.35cm); gap: 0.4cm; justify-content: center; }
+            .print-card { width: 6.35cm; height: 8.89cm; border: 1px solid #000; padding: 8px; box-sizing: border-box; background: white !important; color: black !important; font-size: 7.5pt; overflow: hidden; }
+            .print-card h3 { margin: 0; font-size: 9pt; border-bottom: 1px solid #8b0000; color: #8b0000 !important; }
         }
         #print-zone { display: none; }
     </style>
@@ -66,13 +56,11 @@
         <button onclick="toggleTheme()" class="btn btn-main">🌓 Tema</button>
     </header>
 
-    <!-- Sezione Pin (Preparati) -->
     <div class="pin-panel" id="pinPanel" style="display:none">
-        <strong>📌 Incantesimi Preparati:</strong>
-        <div id="pinnedContainer" style="margin-top:10px;"></div>
+        <strong>📌 Preparati:</strong>
+        <div id="pinnedContainer"></div>
     </div>
 
-    <!-- Modulo Creazione -->
     <section class="spell-form">
         <input type="hidden" id="editId">
         <input type="text" id="nameIta" placeholder="Nome Incantesimo (ITA)">
@@ -91,44 +79,35 @@
             <option>1 azione</option><option>1 azione bonus</option><option>1 reazione</option><option>1 minuto</option><option>10 minuti</option>
         </select>
 
-        <input type="text" id="duration" placeholder="Durata (es. 1 ora)">
+        <input type="text" id="duration" placeholder="Durata (es. Istantanea)">
+
+        <div class="checkbox-group full-width">
+            <label><input type="checkbox" id="isRitual"> 🕯️ Rituale</label>
+            <label><input type="checkbox" id="isConc"> 🧠 Concentrazione</label>
+            <span>| Componenti:</span>
+            <label><input type="checkbox" id="compV"> V</label>
+            <label><input type="checkbox" id="compS"> S</label>
+            <label><input type="checkbox" id="compM" onchange="toggleMaterialField()"> M</label>
+            <input type="text" id="materialDesc" class="material-input" placeholder="Specifica materiali..." style="flex:1">
+        </div>
         
         <div class="full-width">
-            <label class="filter-label">Classi (Seleziona più voci con Ctrl/Cmd):</label>
+            <label>Classi:</label>
             <select id="classesSelect" multiple style="width:100%"></select>
         </div>
 
-        <textarea id="effectDesc" class="full-width" rows="3" placeholder="Descrizione..."></textarea>
+        <textarea id="effectDesc" class="full-width" rows="3" placeholder="Descrizione effetti..."></textarea>
+        <textarea id="higherLevels" class="full-width" rows="2" placeholder="A Livelli Superiori..."></textarea>
         
         <div class="full-width">
-            <label class="filter-label">Immagine:</label>
-            <input type="file" id="imgInput" onchange="handleImg(event)" style="width:100%">
+            <label>Immagine:</label>
+            <input type="file" id="imgInput" onchange="handleImg(event)">
         </div>
 
         <button onclick="handleSubmit()" class="btn btn-main full-width" id="btnSave">📜 Salva Incantesimo</button>
     </section>
 
-    <!-- Filtri Multipli Contemporanei -->
-    <div class="filter-section">
-        <div>
-            <label class="filter-label">Cerca Nome:</label>
-            <input type="text" id="searchBar" placeholder="🔍 Scrivi qui..." onkeyup="renderSpells()" style="width:100%">
-        </div>
-        <div>
-            <label class="filter-label">Filtra Livelli (Multi):</label>
-            <select id="filterLevel" multiple onchange="renderSpells()" style="width:100%; height:60px;">
-                <option value="0">T</option>
-                <script>for(let i=1;i<=9;i++) document.write(`<option value="${i}">${i}</option>`)</script>
-            </select>
-        </div>
-        <div>
-            <label class="filter-label">Filtra Classi (Multi):</label>
-            <select id="filterClass" multiple onchange="renderSpells()" style="width:100%; height:60px;"></select>
-        </div>
-        <button onclick="generatePDF()" class="btn btn-main">🖨️ Stampa (<span id="printCount">0</span>)</button>
-    </div>
-
-    <div id="spellList" class="spell-grid"></div>
+    <div class="spell-grid" id="spellList"></div>
 </div>
 
 <div id="print-zone"></div>
@@ -142,9 +121,9 @@
 
     const CLASS_LIST = ["Artificiere", "Bardo", "Chierico", "Druido", "Guerriero (E.K.)", "Ladro (A.T.)", "Mago", "Paladino", "Ranger", "Stregone", "Warlock"];
 
-    function toggleTheme() {
-        const root = document.documentElement;
-        root.setAttribute('data-theme', root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    function toggleMaterialField() {
+        const field = document.getElementById('materialDesc');
+        field.style.display = document.getElementById('compM').checked ? 'block' : 'none';
     }
 
     function handleImg(e) {
@@ -162,101 +141,65 @@
             school: document.getElementById('school').value,
             castingTime: document.getElementById('castingTime').value,
             duration: document.getElementById('duration').value,
+            isRitual: document.getElementById('isRitual').checked,
+            isConc: document.getElementById('isConc').checked,
+            comp: { v: document.getElementById('compV').checked, s: document.getElementById('compS').checked, m: document.getElementById('compM').checked },
+            materials: document.getElementById('materialDesc').value,
             classes: Array.from(document.getElementById('classesSelect').selectedOptions).map(o => o.value),
             desc: document.getElementById('effectDesc').value,
+            higher: document.getElementById('higherLevels').value,
             image: currentImg
         };
+        
         if(!s.nameIta) return alert("Inserisci il nome!");
         if(isEditing) { spells[spells.findIndex(x => x.id === id)] = s; } else { spells.push(s); }
         localStorage.setItem('dnd_vFinal_spells', JSON.stringify(spells));
         location.reload();
     }
 
-    function togglePin(id) {
-        pinnedIds = pinnedIds.includes(id) ? pinnedIds.filter(i => i !== id) : [...pinnedIds, id];
-        localStorage.setItem('dnd_vFinal_pinned', JSON.stringify(pinnedIds));
-        renderAll();
-    }
-
-    function togglePrint(id) {
-        printQueue = printQueue.includes(id) ? printQueue.filter(i => i !== id) : [...printQueue, id];
-        document.getElementById('printCount').innerText = printQueue.length;
-        renderSpells();
-    }
-
-    function renderAll() { renderPinned(); renderSpells(); }
-
-    function renderPinned() {
-        const container = document.getElementById('pinnedContainer');
-        const pinned = spells.filter(s => pinnedIds.includes(s.id));
-        document.getElementById('pinPanel').style.display = pinned.length ? 'block' : 'none';
-        container.innerHTML = pinned.map(s => `
-            <span class="pin-tag" onclick="document.getElementById('spell-${s.id}').scrollIntoView()">
-                ${s.nameIta} <small onclick="event.stopPropagation(); togglePin(${s.id})">×</small>
-            </span>
-        `).join('');
-    }
-
     function renderSpells() {
         const list = document.getElementById('spellList');
-        const search = document.getElementById('searchBar').value.toLowerCase();
-        const selLevels = Array.from(document.getElementById('filterLevel').selectedOptions).map(o => o.value);
-        const selClasses = Array.from(document.getElementById('filterClass').selectedOptions).map(o => o.value);
-
         list.innerHTML = '';
-        spells.filter(s => {
-            const mSearch = s.nameIta.toLowerCase().includes(search);
-            const mLevel = selLevels.length === 0 || selLevels.includes(s.level);
-            const mClass = selClasses.length === 0 || s.classes.some(c => selClasses.includes(c));
-            return mSearch && mLevel && mClass;
-        }).forEach(s => {
+        spells.forEach(s => {
             const isP = pinnedIds.includes(s.id);
-            const isPr = printQueue.includes(s.id);
+            const comps = [s.comp.v?'V':'', s.comp.s?'S':'', s.comp.m?'M':''].filter(Boolean).join(', ');
             list.innerHTML += `
                 <div class="spell-card" id="spell-${s.id}">
                     <button onclick="togglePin(${s.id})" style="position:absolute; top:10px; right:10px; background:none; border:none; cursor:pointer; font-size:1.2em;">${isP ? '📌' : '📍'}</button>
                     ${s.image ? `<img src="${s.image}" class="spell-img">` : ''}
-                    <h3 style="margin:0; color:var(--primary);">${s.nameIta}</h3>
-                    <div style="font-size:0.8em; margin:5px 0;"><b>Liv:</b> ${s.level == '0' ? 'T' : s.level} | <b>Scuola:</b> ${s.school}</div>
+                    <h3 style="margin:0; color:var(--primary);">${s.nameIta} ${s.isRitual ? '<span class="tag-ritual">(R)</span>' : ''}</h3>
+                    <div style="font-size:0.8em; margin:5px 0;">
+                        <b>Liv:</b> ${s.level == '0' ? 'T' : s.level} | <b>Scuola:</b> ${s.school}<br>
+                        <b>T:</b> ${s.castingTime} | <b>D:</b> ${s.isConc ? '<span class="tag-conc">C</span>, ' : ''}${s.duration}<br>
+                        <b>Comp:</b> ${comps} ${s.comp.m ? `<small>(${s.materials})</small>` : ''}
+                    </div>
                     <p style="font-size:0.9em; white-space:pre-wrap;">${s.desc}</p>
-                    <button class="btn btn-main" style="width:100%; background:${isPr ? '#c62828' : '#2e7d32'}" onclick="togglePrint(${s.id})">
-                        ${isPr ? 'Rimuovi' : 'Stampa'}
-                    </button>
+                    ${s.higher ? `<div class="higher-levels"><b>A Livelli Superiori:</b> ${s.higher}</div>` : ''}
                     <div style="margin-top:10px; display:flex; gap:5px;">
-                        <button onclick="editSpell(${s.id})" class="btn" style="flex:1; background:#ff9800; color:white; padding:5px;">Edit</button>
-                        <button onclick="deleteSpell(${s.id})" class="btn" style="flex:1; background:#f44336; color:white; padding:5px;">Del</button>
+                        <button onclick="togglePrint(${s.id})" class="btn" style="flex:2; background:#2e7d32; color:white">Stampa</button>
+                        <button onclick="deleteSpell(${s.id})" class="btn" style="flex:1; background:#f44336; color:white">Del</button>
                     </div>
                 </div>`;
         });
     }
 
-    function editSpell(id) {
-        const s = spells.find(x => x.id === id);
-        isEditing = true;
-        document.getElementById('editId').value = s.id;
-        document.getElementById('nameIta').value = s.nameIta;
-        document.getElementById('effectDesc').value = s.desc;
-        document.getElementById('btnSave').innerText = "💾 Aggiorna";
-        window.scrollTo(0,0);
+    function togglePin(id) {
+        pinnedIds = pinnedIds.includes(id) ? pinnedIds.filter(i => i !== id) : [...pinnedIds, id];
+        localStorage.setItem('dnd_vFinal_pinned', JSON.stringify(pinnedIds));
+        location.reload();
     }
 
-    function deleteSpell(id) { if(confirm("Eliminare?")) { spells = spells.filter(s => s.id !== id); localStorage.setItem('dnd_vFinal_spells', JSON.stringify(spells)); renderAll(); } }
+    function deleteSpell(id) { if(confirm("Eliminare?")) { spells = spells.filter(s => s.id !== id); localStorage.setItem('dnd_vFinal_spells', JSON.stringify(spells)); location.reload(); } }
 
-    function generatePDF() {
-        if(!printQueue.length) return alert("Seleziona incantesimi!");
-        const zone = document.getElementById('print-zone');
-        zone.innerHTML = printQueue.map(id => {
-            const s = spells.find(x => x.id === id);
-            return `<div class="print-card"><h3>${s.nameIta}</h3><p>Liv. ${s.level} | ${s.school}</p><p>${s.desc}</p></div>`;
-        }).join('');
-        window.print();
-    }
-
-    // Init
     const cSel = document.getElementById('classesSelect');
-    const fClass = document.getElementById('filterClass');
-    CLASS_LIST.forEach(c => { cSel.add(new Option(c, c)); fClass.add(new Option(c, c)); });
-    renderAll();
+    CLASS_LIST.forEach(c => cSel.add(new Option(c, c)));
+    renderSpells();
+    if(pinnedIds.length) {
+        document.getElementById('pinPanel').style.display = 'block';
+        document.getElementById('pinnedContainer').innerHTML = spells.filter(s => pinnedIds.includes(s.id)).map(s => `
+            <span class="pin-tag" onclick="document.getElementById('spell-${s.id}').scrollIntoView()">${s.nameIta}</span>
+        `).join('');
+    }
 </script>
 </body>
 </html>
