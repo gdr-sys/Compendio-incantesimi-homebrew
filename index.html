@@ -15,55 +15,59 @@
         }
         body { font-family: 'Palatino', serif; background-color: var(--bg); color: var(--text); padding: 20px; transition: 0.3s; scroll-behavior: smooth; }
         .container { max-width: 1200px; margin: auto; }
+        
         header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--primary); margin-bottom: 25px; }
         
+        /* Sezione Pin Rapidi */
         .pin-panel { background: var(--pin-bg); padding: 15px; border-radius: 8px; border: 1px dashed var(--primary); margin-bottom: 20px; }
         .pin-tag { background: var(--card-bg); padding: 5px 12px; border-radius: 20px; margin: 4px; display: inline-block; border: 1px solid var(--primary); cursor: pointer; font-size: 0.85em; }
 
-        .spell-form { background: var(--form-bg); padding: 25px; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        /* Form di Creazione */
+        .spell-form { background: var(--form-bg); padding: 25px; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
         .full-width { grid-column: 1 / -1; }
         input, select, textarea { padding: 10px; border: 1px solid var(--accent); border-radius: 4px; background: var(--card-bg); color: var(--text); font-family: inherit; }
         
-        .checkbox-group { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 4px; }
-        .material-input { display: none; margin-top: 10px; }
+        .toggle-group { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 4px; }
+        .material-box { display: none; margin-top: 10px; width: 100%; }
 
-        .spell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 25px; }
+        /* Filtri Avanzati */
+        .filters { background: var(--form-bg); padding: 20px; border-radius: 8px; margin-bottom: 25px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 15px; align-items: end; }
+        .filters label { font-size: 0.8em; font-weight: bold; color: var(--primary); display: block; margin-bottom: 5px; }
+        select[multiple] { height: 80px; width: 100%; }
+
+        /* Card Incantesimo */
+        .spell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
         .spell-card { background: var(--card-bg); border: 1px solid var(--accent); border-left: 8px solid var(--primary); padding: 20px; border-radius: 4px; position: relative; }
-        .spell-img { width: 100%; height: 160px; object-fit: cover; border-radius: 4px; margin-bottom: 10px; border: 1px solid var(--accent); }
-
-        .tag-ritual { color: #2e7d32; font-weight: bold; font-style: italic; }
-        .tag-conc { color: #1565c0; font-weight: bold; }
-        .higher-levels { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--accent); font-size: 0.85em; font-style: italic; }
-
-        .btn { cursor: pointer; border: none; border-radius: 4px; padding: 10px 15px; font-weight: bold; }
+        .spell-img { width: 100%; height: 180px; object-fit: cover; border-radius: 4px; margin-bottom: 12px; border: 1px solid var(--accent); }
+        
+        .btn { cursor: pointer; border: none; border-radius: 4px; padding: 10px 15px; font-weight: bold; transition: 0.2s; }
         .btn-main { background: var(--primary); color: white; }
-
-        @media print {
-            body * { visibility: hidden; }
-            #print-zone, #print-zone * { visibility: visible; }
-            #print-zone { position: absolute; left: 0; top: 0; width: 100%; display: grid !important; grid-template-columns: repeat(3, 6.35cm); gap: 0.4cm; justify-content: center; }
-            .print-card { width: 6.35cm; height: 8.89cm; border: 1px solid #000; padding: 8px; box-sizing: border-box; background: white !important; color: black !important; font-size: 7.5pt; overflow: hidden; }
-            .print-card h3 { margin: 0; font-size: 9pt; border-bottom: 1px solid #8b0000; color: #8b0000 !important; }
-        }
-        #print-zone { display: none; }
+        .btn-clear { background: #666; color: white; }
     </style>
 </head>
 <body>
 
-<div class="container no-print">
+<div class="container">
     <header>
-        <h1>📖 Compendio Incantesimi Homebrew</h1>
-        <button onclick="toggleTheme()" class="btn btn-main">🌓 Tema</button>
+        <h1>📖 Compendio Incantesimi</h1>
+        <div style="display:flex; gap:10px;">
+            <button onclick="exportJSON()" class="btn" style="background:#4a90e2; color:white;">Esporta JSON</button>
+            <button onclick="document.getElementById('importFile').click()" class="btn" style="background:#7ed321; color:white;">Importa JSON</button>
+            <input type="file" id="importFile" style="display:none" onchange="importJSON(event)">
+            <button onclick="toggleTheme()" class="btn btn-main">🌓 Tema</button>
+        </div>
     </header>
 
     <div class="pin-panel" id="pinPanel" style="display:none">
-        <strong>📌 Preparati:</strong>
+        <strong>📌 Preparati (Clicca per scorrere):</strong>
         <div id="pinnedContainer"></div>
     </div>
 
+    <!-- Form di Inserimento -->
     <section class="spell-form">
         <input type="hidden" id="editId">
-        <input type="text" id="nameIta" placeholder="Nome Incantesimo (ITA)">
+        <input type="text" id="nameIta" placeholder="Nome Italiano">
+        <input type="text" id="nameEng" placeholder="Nome Inglese">
         
         <select id="level">
             <option value="0">Trucchetto</option>
@@ -76,28 +80,31 @@
         </select>
 
         <select id="castingTime">
-            <option>1 azione</option><option>1 azione bonus</option><option>1 reazione</option><option>1 minuto</option><option>10 minuti</option>
+            <option>1 azione</option><option>1 azione bonus</option><option>1 reazione</option><option>1 minuto</option><option>10 minuti</option><option>1 ora</option>
         </select>
 
-        <input type="text" id="duration" placeholder="Durata (es. Istantanea)">
+        <input type="text" id="range" placeholder="Gittata (es. 18 metri)">
+        <input type="text" id="duration" placeholder="Durata">
 
-        <div class="checkbox-group full-width">
+        <div class="toggle-group full-width">
             <label><input type="checkbox" id="isRitual"> 🕯️ Rituale</label>
             <label><input type="checkbox" id="isConc"> 🧠 Concentrazione</label>
             <span>| Componenti:</span>
             <label><input type="checkbox" id="compV"> V</label>
             <label><input type="checkbox" id="compS"> S</label>
-            <label><input type="checkbox" id="compM" onchange="toggleMaterialField()"> M</label>
-            <input type="text" id="materialDesc" class="material-input" placeholder="Specifica materiali..." style="flex:1">
-        </div>
-        
-        <div class="full-width">
-            <label>Classi:</label>
-            <select id="classesSelect" multiple style="width:100%"></select>
+            <label><input type="checkbox" id="compM" onchange="document.getElementById('matBox').style.display = this.checked ? 'block' : 'none'"> M</label>
+            <div id="matBox" class="material-box">
+                <input type="text" id="materialDesc" placeholder="Specifica materiali..." style="width:100%">
+            </div>
         </div>
 
-        <textarea id="effectDesc" class="full-width" rows="3" placeholder="Descrizione effetti..."></textarea>
-        <textarea id="higherLevels" class="full-width" rows="2" placeholder="A Livelli Superiori..."></textarea>
+        <div class="full-width">
+            <label>Classi (Ctrl/Cmd + Click):</label>
+            <select id="classesSelect" multiple></select>
+        </div>
+
+        <textarea id="effectDesc" class="full-width" rows="4" placeholder="Effetto dell'incantesimo..."></textarea>
+        <textarea id="higherLevels" class="full-width" rows="2" placeholder="Ai livelli più alti..."></textarea>
         
         <div class="full-width">
             <label>Immagine:</label>
@@ -107,23 +114,38 @@
         <button onclick="handleSubmit()" class="btn btn-main full-width" id="btnSave">📜 Salva Incantesimo</button>
     </section>
 
-    <div class="spell-grid" id="spellList"></div>
-</div>
+    <!-- Filtri -->
+    <div class="filters">
+        <div>
+            <label>Cerca Nome:</label>
+            <input type="text" id="searchBar" placeholder="Cerca..." onkeyup="renderAll()" style="width:100%">
+        </div>
+        <div>
+            <label>Livelli (Multipli):</label>
+            <select id="filterLevel" multiple onchange="renderAll()">
+                <option value="0">T</option>
+                <script>for(let i=1;i<=9;i++) document.write(`<option value="${i}">${i}</option>`)</script>
+            </select>
+        </div>
+        <div>
+            <label>Classi (Multipli):</label>
+            <select id="filterClass" multiple onchange="renderAll()"></select>
+        </div>
+        <button onclick="resetFilters()" class="btn btn-clear">Azzera Filtri</button>
+    </div>
 
-<div id="print-zone"></div>
+    <div id="spellList" class="spell-grid"></div>
+</div>
 
 <script>
     let spells = JSON.parse(localStorage.getItem('dnd_vFinal_spells')) || [];
     let pinnedIds = JSON.parse(localStorage.getItem('dnd_vFinal_pinned')) || [];
-    let printQueue = [];
     let currentImg = "";
-    let isEditing = false;
-
     const CLASS_LIST = ["Artificiere", "Bardo", "Chierico", "Druido", "Guerriero (E.K.)", "Ladro (A.T.)", "Mago", "Paladino", "Ranger", "Stregone", "Warlock"];
 
-    function toggleMaterialField() {
-        const field = document.getElementById('materialDesc');
-        field.style.display = document.getElementById('compM').checked ? 'block' : 'none';
+    function toggleTheme() {
+        const root = document.documentElement;
+        root.setAttribute('data-theme', root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
     }
 
     function handleImg(e) {
@@ -133,51 +155,66 @@
     }
 
     function handleSubmit() {
-        const id = isEditing ? parseInt(document.getElementById('editId').value) : Date.now();
+        const id = document.getElementById('editId').value ? parseInt(document.getElementById('editId').value) : Date.now();
         const s = {
             id,
             nameIta: document.getElementById('nameIta').value,
+            nameEng: document.getElementById('nameEng').value,
             level: document.getElementById('level').value,
             school: document.getElementById('school').value,
-            castingTime: document.getElementById('castingTime').value,
+            ritual: document.getElementById('isRitual').checked,
+            conc: document.getElementById('isConc').checked,
+            cast: document.getElementById('castingTime').value,
+            range: document.getElementById('range').value,
             duration: document.getElementById('duration').value,
-            isRitual: document.getElementById('isRitual').checked,
-            isConc: document.getElementById('isConc').checked,
             comp: { v: document.getElementById('compV').checked, s: document.getElementById('compS').checked, m: document.getElementById('compM').checked },
-            materials: document.getElementById('materialDesc').value,
+            mats: document.getElementById('materialDesc').value,
             classes: Array.from(document.getElementById('classesSelect').selectedOptions).map(o => o.value),
-            desc: document.getElementById('effectDesc').value,
+            effect: document.getElementById('effectDesc').value,
             higher: document.getElementById('higherLevels').value,
             image: currentImg
         };
         
-        if(!s.nameIta) return alert("Inserisci il nome!");
-        if(isEditing) { spells[spells.findIndex(x => x.id === id)] = s; } else { spells.push(s); }
+        if(!s.nameIta) return alert("Manca il nome!");
+        const idx = spells.findIndex(x => x.id === id);
+        if(idx > -1) spells[idx] = s; else spells.push(s);
+        
         localStorage.setItem('dnd_vFinal_spells', JSON.stringify(spells));
         location.reload();
     }
 
-    function renderSpells() {
+    function renderAll() {
+        renderPinned();
         const list = document.getElementById('spellList');
+        const search = document.getElementById('searchBar').value.toLowerCase();
+        const selLevels = Array.from(document.getElementById('filterLevel').selectedOptions).map(o => o.value);
+        const selClasses = Array.from(document.getElementById('filterClass').selectedOptions).map(o => o.value);
+
         list.innerHTML = '';
-        spells.forEach(s => {
+        spells.filter(s => {
+            const mSearch = s.nameIta.toLowerCase().includes(search) || s.nameEng.toLowerCase().includes(search);
+            const mLevel = selLevels.length === 0 || selLevels.includes(s.level);
+            const mClass = selClasses.length === 0 || s.classes.some(c => selClasses.includes(c));
+            return mSearch && mLevel && mClass;
+        }).forEach(s => {
             const isP = pinnedIds.includes(s.id);
-            const comps = [s.comp.v?'V':'', s.comp.s?'S':'', s.comp.m?'M':''].filter(Boolean).join(', ');
             list.innerHTML += `
                 <div class="spell-card" id="spell-${s.id}">
-                    <button onclick="togglePin(${s.id})" style="position:absolute; top:10px; right:10px; background:none; border:none; cursor:pointer; font-size:1.2em;">${isP ? '📌' : '📍'}</button>
+                    <button onclick="togglePin(${s.id})" style="position:absolute; top:10px; right:10px; background:none; border:none; cursor:pointer; font-size:1.5em;">${isP ? '📌' : '📍'}</button>
                     ${s.image ? `<img src="${s.image}" class="spell-img">` : ''}
-                    <h3 style="margin:0; color:var(--primary);">${s.nameIta} ${s.isRitual ? '<span class="tag-ritual">(R)</span>' : ''}</h3>
-                    <div style="font-size:0.8em; margin:5px 0;">
-                        <b>Liv:</b> ${s.level == '0' ? 'T' : s.level} | <b>Scuola:</b> ${s.school}<br>
-                        <b>T:</b> ${s.castingTime} | <b>D:</b> ${s.isConc ? '<span class="tag-conc">C</span>, ' : ''}${s.duration}<br>
-                        <b>Comp:</b> ${comps} ${s.comp.m ? `<small>(${s.materials})</small>` : ''}
+                    <h3 style="margin:0;">${s.nameIta} <small style="opacity:0.6">(${s.nameEng})</small></h3>
+                    <div style="font-size:0.85em; margin:5px 0;">
+                        <b>Livello:</b> ${s.level == '0' ? 'Trucchetto' : s.level + '°'} ${s.ritual ? '(R)' : ''} | <b>Scuola:</b> ${s.school}<br>
+                        <b>Lancio:</b> ${s.cast} | <b>Gittata:</b> ${s.range}<br>
+                        <b>Durata:</b> ${s.conc ? 'C, ' : ''}${s.duration}<br>
+                        <b>Componenti:</b> ${[s.comp.v?'V':'', s.comp.s?'S':'', s.comp.m?'M':''].filter(Boolean).join(', ')} 
+                        ${s.comp.m ? `<br><small><i>Materiali: ${s.mats}</i></small>` : ''}
                     </div>
-                    <p style="font-size:0.9em; white-space:pre-wrap;">${s.desc}</p>
-                    ${s.higher ? `<div class="higher-levels"><b>A Livelli Superiori:</b> ${s.higher}</div>` : ''}
-                    <div style="margin-top:10px; display:flex; gap:5px;">
-                        <button onclick="togglePrint(${s.id})" class="btn" style="flex:2; background:#2e7d32; color:white">Stampa</button>
-                        <button onclick="deleteSpell(${s.id})" class="btn" style="flex:1; background:#f44336; color:white">Del</button>
+                    <p style="font-size:0.9em; white-space:pre-wrap; background:rgba(0,0,0,0.03); padding:8px; border-radius:4px;">${s.effect}</p>
+                    ${s.higher ? `<div style="font-size:0.85em; margin-top:8px;"><b>Ai livelli più alti:</b> ${s.higher}</div>` : ''}
+                    <div style="margin-top:10px; display:flex; gap:8px;">
+                        <button onclick="editSpell(${s.id})" class="btn" style="flex:1; background:#ff9800; color:white;">Modifica</button>
+                        <button onclick="deleteSpell(${s.id})" class="btn" style="flex:1; background:#f44336; color:white;">Elimina</button>
                     </div>
                 </div>`;
         });
@@ -186,20 +223,73 @@
     function togglePin(id) {
         pinnedIds = pinnedIds.includes(id) ? pinnedIds.filter(i => i !== id) : [...pinnedIds, id];
         localStorage.setItem('dnd_vFinal_pinned', JSON.stringify(pinnedIds));
-        location.reload();
+        renderAll();
     }
 
-    function deleteSpell(id) { if(confirm("Eliminare?")) { spells = spells.filter(s => s.id !== id); localStorage.setItem('dnd_vFinal_spells', JSON.stringify(spells)); location.reload(); } }
-
-    const cSel = document.getElementById('classesSelect');
-    CLASS_LIST.forEach(c => cSel.add(new Option(c, c)));
-    renderSpells();
-    if(pinnedIds.length) {
-        document.getElementById('pinPanel').style.display = 'block';
-        document.getElementById('pinnedContainer').innerHTML = spells.filter(s => pinnedIds.includes(s.id)).map(s => `
-            <span class="pin-tag" onclick="document.getElementById('spell-${s.id}').scrollIntoView()">${s.nameIta}</span>
-        `).join('');
+    function renderPinned() {
+        const pan = document.getElementById('pinPanel');
+        const cont = document.getElementById('pinnedContainer');
+        const pinned = spells.filter(s => pinnedIds.includes(s.id));
+        pan.style.display = pinned.length ? 'block' : 'none';
+        cont.innerHTML = pinned.map(s => `<span class="pin-tag" onclick="document.getElementById('spell-${s.id}').scrollIntoView()">${s.nameIta}</span>`).join('');
     }
+
+    function editSpell(id) {
+        const s = spells.find(x => x.id === id);
+        document.getElementById('editId').value = s.id;
+        document.getElementById('nameIta').value = s.nameIta;
+        document.getElementById('nameEng').value = s.nameEng;
+        document.getElementById('level').value = s.level;
+        document.getElementById('school').value = s.school;
+        document.getElementById('isRitual').checked = s.ritual;
+        document.getElementById('isConc').checked = s.conc;
+        document.getElementById('castingTime').value = s.cast;
+        document.getElementById('range').value = s.range;
+        document.getElementById('duration').value = s.duration;
+        document.getElementById('compV').checked = s.comp.v;
+        document.getElementById('compS').checked = s.comp.s;
+        document.getElementById('compM').checked = s.comp.m;
+        document.getElementById('materialDesc').value = s.mats;
+        document.getElementById('effectDesc').value = s.effect;
+        document.getElementById('higherLevels').value = s.higher;
+        document.getElementById('matBox').style.display = s.comp.m ? 'block' : 'none';
+        currentImg = s.image;
+        document.getElementById('btnSave').innerText = "💾 Aggiorna Incantesimo";
+        window.scrollTo(0,0);
+    }
+
+    function resetFilters() {
+        document.getElementById('searchBar').value = '';
+        document.getElementById('filterLevel').selectedIndex = -1;
+        document.getElementById('filterClass').selectedIndex = -1;
+        renderAll();
+    }
+
+    function exportJSON() {
+        const blob = new Blob([JSON.stringify(spells)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'compendio_dnd.json';
+        a.click();
+    }
+
+    function importJSON(e) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            spells = JSON.parse(event.target.result);
+            localStorage.setItem('dnd_vFinal_spells', JSON.stringify(spells));
+            location.reload();
+        };
+        reader.readAsText(e.target.files[0]);
+    }
+
+    function deleteSpell(id) { if(confirm("Cancellare?")) { spells = spells.filter(s => s.id !== id); localStorage.setItem('dnd_vFinal_spells', JSON.stringify(spells)); renderAll(); } }
+
+    const cS = document.getElementById('classesSelect');
+    const fC = document.getElementById('filterClass');
+    CLASS_LIST.forEach(c => { cS.add(new Option(c, c)); fC.add(new Option(c, c)); });
+
+    renderAll();
 </script>
 </body>
 </html>
