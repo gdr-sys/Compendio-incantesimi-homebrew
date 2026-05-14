@@ -14,56 +14,59 @@
             --text: #e0e0e0; --accent: #5d4a36; --form-bg: #3d3d3d; --pin-bg: #4a3f35;
         }
         body { font-family: 'Palatino', serif; background-color: var(--bg); color: var(--text); padding: 20px; transition: 0.3s; scroll-behavior: smooth; }
-        .container { max-width: 1200px; margin: auto; }
+        .container { max-width: 1000px; margin: auto; }
         
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--primary); margin-bottom: 25px; }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--primary); margin-bottom: 25px; flex-wrap: wrap; gap: 10px; }
         
-        /* Sezione Pin Rapidi */
+        /* Pannello Pin */
         .pin-panel { background: var(--pin-bg); padding: 15px; border-radius: 8px; border: 1px dashed var(--primary); margin-bottom: 20px; }
         .pin-tag { background: var(--card-bg); padding: 5px 12px; border-radius: 20px; margin: 4px; display: inline-block; border: 1px solid var(--primary); cursor: pointer; font-size: 0.85em; }
 
         /* Form di Creazione */
         .spell-form { background: var(--form-bg); padding: 25px; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
         .full-width { grid-column: 1 / -1; }
-        input, select, textarea { padding: 10px; border: 1px solid var(--accent); border-radius: 4px; background: var(--card-bg); color: var(--text); font-family: inherit; }
+        input, select, textarea { padding: 10px; border: 1px solid var(--accent); border-radius: 4px; background: var(--card-bg); color: var(--text); font-family: inherit; width: 100%; box-sizing: border-box; }
         
-        .toggle-group { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 4px; }
-        .material-box { display: none; margin-top: 10px; width: 100%; }
+        .toggle-row { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 4px; }
 
-        /* Filtri Avanzati */
-        .filters { background: var(--form-bg); padding: 20px; border-radius: 8px; margin-bottom: 25px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 15px; align-items: end; }
-        .filters label { font-size: 0.8em; font-weight: bold; color: var(--primary); display: block; margin-bottom: 5px; }
-        select[multiple] { height: 80px; width: 100%; }
+        /* Filtri Collassabili */
+        .filter-container { background: var(--form-bg); border-radius: 8px; margin-bottom: 25px; overflow: hidden; border: 1px solid var(--accent); }
+        .filter-header { background: var(--accent); color: white; padding: 10px 15px; cursor: pointer; display: flex; justify-content: space-between; font-weight: bold; }
+        .filter-content { padding: 15px; display: none; }
+        .filter-content.active { display: block; }
+        
+        .toggle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-top: 10px; }
+        .toggle-btn { background: var(--card-bg); border: 1px solid var(--accent); padding: 6px; border-radius: 4px; cursor: pointer; text-align: center; font-size: 0.85em; transition: 0.2s; }
+        .toggle-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* Card Incantesimo */
-        .spell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+        /* Card */
+        .spell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
         .spell-card { background: var(--card-bg); border: 1px solid var(--accent); border-left: 8px solid var(--primary); padding: 20px; border-radius: 4px; position: relative; }
-        .spell-img { width: 100%; height: 180px; object-fit: cover; border-radius: 4px; margin-bottom: 12px; border: 1px solid var(--accent); }
+        .spell-img { width: 100%; height: 180px; object-fit: cover; border-radius: 4px; margin-bottom: 12px; }
         
-        .btn { cursor: pointer; border: none; border-radius: 4px; padding: 10px 15px; font-weight: bold; transition: 0.2s; }
+        .btn { cursor: pointer; border: none; border-radius: 4px; padding: 10px 15px; font-weight: bold; }
         .btn-main { background: var(--primary); color: white; }
-        .btn-clear { background: #666; color: white; }
+        .btn-reset { font-size: 0.7em; background: #666; color: white; padding: 2px 8px; margin-left: 10px; border-radius: 3px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>📖 Compendio Incantesimi</h1>
-        <div style="display:flex; gap:10px;">
-            <button onclick="exportJSON()" class="btn" style="background:#4a90e2; color:white;">Esporta JSON</button>
-            <button onclick="document.getElementById('importFile').click()" class="btn" style="background:#7ed321; color:white;">Importa JSON</button>
+        <h1>📖 Compendio Homebrew</h1>
+        <div style="display:flex; gap:5px;">
+            <button onclick="exportJSON()" class="btn" style="background:#4a90e2; color:white; font-size:0.8em;">Export</button>
+            <button onclick="document.getElementById('importFile').click()" class="btn" style="background:#7ed321; color:white; font-size:0.8em;">Import</button>
             <input type="file" id="importFile" style="display:none" onchange="importJSON(event)">
-            <button onclick="toggleTheme()" class="btn btn-main">🌓 Tema</button>
+            <button onclick="toggleTheme()" class="btn btn-main">🌓</button>
         </div>
     </header>
 
     <div class="pin-panel" id="pinPanel" style="display:none">
-        <strong>📌 Preparati (Clicca per scorrere):</strong>
-        <div id="pinnedContainer"></div>
+        <strong>📌 Preparati:</strong> <div id="pinnedContainer"></div>
     </div>
 
-    <!-- Form di Inserimento -->
+    <!-- Creazione -->
     <section class="spell-form">
         <input type="hidden" id="editId">
         <input type="text" id="nameIta" placeholder="Nome Italiano">
@@ -80,58 +83,60 @@
         </select>
 
         <select id="castingTime">
-            <option>1 azione</option><option>1 azione bonus</option><option>1 reazione</option><option>1 minuto</option><option>10 minuti</option><option>1 ora</option>
+            <option>1 azione</option><option>1 azione bonus</option><option>1 reazione</option><option>1 minuto</option><option>10 minuti</option>
         </select>
 
-        <input type="text" id="range" placeholder="Gittata (es. 18 metri)">
+        <input type="text" id="range" placeholder="Gittata">
         <input type="text" id="duration" placeholder="Durata">
 
-        <div class="toggle-group full-width">
-            <label><input type="checkbox" id="isRitual"> 🕯️ Rituale</label>
-            <label><input type="checkbox" id="isConc"> 🧠 Concentrazione</label>
-            <span>| Componenti:</span>
+        <div class="toggle-row full-width">
+            <label><input type="checkbox" id="isRitual"> Rituale</label>
+            <label><input type="checkbox" id="isConc"> Concentrazione</label>
             <label><input type="checkbox" id="compV"> V</label>
             <label><input type="checkbox" id="compS"> S</label>
             <label><input type="checkbox" id="compM" onchange="document.getElementById('matBox').style.display = this.checked ? 'block' : 'none'"> M</label>
-            <div id="matBox" class="material-box">
-                <input type="text" id="materialDesc" placeholder="Specifica materiali..." style="width:100%">
-            </div>
+            <div id="matBox" class="full-width" style="display:none"><input type="text" id="materialDesc" placeholder="Materiali..."></div>
         </div>
 
         <div class="full-width">
-            <label>Classi (Ctrl/Cmd + Click):</label>
-            <select id="classesSelect" multiple></select>
+            <label>Classi (Seleziona):</label>
+            <div id="classCreateGrid" class="toggle-grid"></div>
         </div>
 
-        <textarea id="effectDesc" class="full-width" rows="4" placeholder="Effetto dell'incantesimo..."></textarea>
+        <textarea id="effectDesc" class="full-width" rows="3" placeholder="Effetto..."></textarea>
         <textarea id="higherLevels" class="full-width" rows="2" placeholder="Ai livelli più alti..."></textarea>
-        
-        <div class="full-width">
-            <label>Immagine:</label>
-            <input type="file" id="imgInput" onchange="handleImg(event)">
-        </div>
+        <input type="file" id="imgInput" onchange="handleImg(event)" class="full-width">
 
         <button onclick="handleSubmit()" class="btn btn-main full-width" id="btnSave">📜 Salva Incantesimo</button>
     </section>
 
     <!-- Filtri -->
-    <div class="filters">
-        <div>
-            <label>Cerca Nome:</label>
-            <input type="text" id="searchBar" placeholder="Cerca..." onkeyup="renderAll()" style="width:100%">
+    <div class="filter-container">
+        <div class="filter-header" onclick="toggleFilter('fSearch')"><span>🔍 Cerca Nome</span></div>
+        <div id="fSearch" class="filter-content active">
+            <input type="text" id="searchBar" placeholder="Scrivi nome..." onkeyup="renderAll()">
         </div>
-        <div>
-            <label>Livelli (Multipli):</label>
-            <select id="filterLevel" multiple onchange="renderAll()">
-                <option value="0">T</option>
-                <script>for(let i=1;i<=9;i++) document.write(`<option value="${i}">${i}</option>`)</script>
-            </select>
+    </div>
+
+    <div class="filter-container">
+        <div class="filter-header" onclick="toggleFilter('fLevel')">
+            <span>📊 Livelli <span class="btn-reset" onclick="event.stopPropagation(); resetFilterGroup('level')">Reset</span></span>
         </div>
-        <div>
-            <label>Classi (Multipli):</label>
-            <select id="filterClass" multiple onchange="renderAll()"></select>
+        <div id="fLevel" class="filter-content">
+            <div id="filterLevelGrid" class="toggle-grid">
+                <div class="toggle-btn" data-val="0" onclick="toggleFilterVal(this, 'level')">T</div>
+                <script>for(let i=1;i<=9;i++) document.write(`<div class="toggle-btn" data-val="${i}" onclick="toggleFilterVal(this, 'level')">${i}</div>`)</script>
+            </div>
         </div>
-        <button onclick="resetFilters()" class="btn btn-clear">Azzera Filtri</button>
+    </div>
+
+    <div class="filter-container">
+        <div class="filter-header" onclick="toggleFilter('fClass')">
+            <span>🛡️ Classi <span class="btn-reset" onclick="event.stopPropagation(); resetFilterGroup('class')">Reset</span></span>
+        </div>
+        <div id="fClass" class="filter-content">
+            <div id="filterClassGrid" class="toggle-grid"></div>
+        </div>
     </div>
 
     <div id="spellList" class="spell-grid"></div>
@@ -142,10 +147,16 @@
     let pinnedIds = JSON.parse(localStorage.getItem('dnd_vFinal_pinned')) || [];
     let currentImg = "";
     const CLASS_LIST = ["Artificiere", "Bardo", "Chierico", "Druido", "Guerriero (E.K.)", "Ladro (A.T.)", "Mago", "Paladino", "Ranger", "Stregone", "Warlock"];
+    
+    let activeFilters = { levels: [], classes: [] };
 
     function toggleTheme() {
         const root = document.documentElement;
         root.setAttribute('data-theme', root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    }
+
+    function toggleFilter(id) {
+        document.getElementById(id).classList.toggle('active');
     }
 
     function handleImg(e) {
@@ -154,8 +165,30 @@
         if(e.target.files[0]) r.readAsDataURL(e.target.files[0]);
     }
 
+    function toggleFilterVal(el, type) {
+        const val = el.getAttribute('data-val');
+        const targetArr = type === 'level' ? activeFilters.levels : activeFilters.classes;
+        
+        if(el.classList.toggle('selected')) {
+            targetArr.push(val);
+        } else {
+            const index = targetArr.indexOf(val);
+            if (index > -1) targetArr.splice(index, 1);
+        }
+        renderAll();
+    }
+
+    function resetFilterGroup(type) {
+        const container = type === 'level' ? 'filterLevelGrid' : 'filterClassGrid';
+        document.querySelectorAll(`#${container} .toggle-btn`).forEach(b => b.classList.remove('selected'));
+        if(type === 'level') activeFilters.levels = []; else activeFilters.classes = [];
+        renderAll();
+    }
+
     function handleSubmit() {
         const id = document.getElementById('editId').value ? parseInt(document.getElementById('editId').value) : Date.now();
+        const selClasses = Array.from(document.querySelectorAll('#classCreateGrid .toggle-btn.selected')).map(b => b.getAttribute('data-val'));
+        
         const s = {
             id,
             nameIta: document.getElementById('nameIta').value,
@@ -169,7 +202,7 @@
             duration: document.getElementById('duration').value,
             comp: { v: document.getElementById('compV').checked, s: document.getElementById('compS').checked, m: document.getElementById('compM').checked },
             mats: document.getElementById('materialDesc').value,
-            classes: Array.from(document.getElementById('classesSelect').selectedOptions).map(o => o.value),
+            classes: selClasses,
             effect: document.getElementById('effectDesc').value,
             higher: document.getElementById('higherLevels').value,
             image: currentImg
@@ -187,34 +220,32 @@
         renderPinned();
         const list = document.getElementById('spellList');
         const search = document.getElementById('searchBar').value.toLowerCase();
-        const selLevels = Array.from(document.getElementById('filterLevel').selectedOptions).map(o => o.value);
-        const selClasses = Array.from(document.getElementById('filterClass').selectedOptions).map(o => o.value);
 
         list.innerHTML = '';
-        spells.filter(s => {
+        const filtered = spells.filter(s => {
             const mSearch = s.nameIta.toLowerCase().includes(search) || s.nameEng.toLowerCase().includes(search);
-            const mLevel = selLevels.length === 0 || selLevels.includes(s.level);
-            const mClass = selClasses.length === 0 || s.classes.some(c => selClasses.includes(c));
+            const mLevel = activeFilters.levels.length === 0 || activeFilters.levels.includes(s.level.toString());
+            const mClass = activeFilters.classes.length === 0 || s.classes.some(c => activeFilters.classes.includes(c));
             return mSearch && mLevel && mClass;
-        }).forEach(s => {
+        });
+
+        filtered.forEach(s => {
             const isP = pinnedIds.includes(s.id);
             list.innerHTML += `
                 <div class="spell-card" id="spell-${s.id}">
                     <button onclick="togglePin(${s.id})" style="position:absolute; top:10px; right:10px; background:none; border:none; cursor:pointer; font-size:1.5em;">${isP ? '📌' : '📍'}</button>
                     ${s.image ? `<img src="${s.image}" class="spell-img">` : ''}
-                    <h3 style="margin:0;">${s.nameIta} <small style="opacity:0.6">(${s.nameEng})</small></h3>
+                    <h3 style="margin:0;">${s.nameIta}</h3>
                     <div style="font-size:0.85em; margin:5px 0;">
-                        <b>Livello:</b> ${s.level == '0' ? 'Trucchetto' : s.level + '°'} ${s.ritual ? '(R)' : ''} | <b>Scuola:</b> ${s.school}<br>
-                        <b>Lancio:</b> ${s.cast} | <b>Gittata:</b> ${s.range}<br>
-                        <b>Durata:</b> ${s.conc ? 'C, ' : ''}${s.duration}<br>
-                        <b>Componenti:</b> ${[s.comp.v?'V':'', s.comp.s?'S':'', s.comp.m?'M':''].filter(Boolean).join(', ')} 
-                        ${s.comp.m ? `<br><small><i>Materiali: ${s.mats}</i></small>` : ''}
+                        <b>${s.level == '0' ? 'Trucchetto' : s.level + '° livello'}</b> ${s.ritual ? '(Rituale)' : ''}<br>
+                        <b>Scuola:</b> ${s.school} | <b>Lancio:</b> ${s.cast}<br>
+                        <b>Durata:</b> ${s.conc ? 'Concentrazione, ' : ''}${s.duration}<br>
+                        <b>Comp:</b> ${[s.comp.v?'V':'', s.comp.s?'S':'', s.comp.m?'M':''].filter(Boolean).join(', ')}
                     </div>
-                    <p style="font-size:0.9em; white-space:pre-wrap; background:rgba(0,0,0,0.03); padding:8px; border-radius:4px;">${s.effect}</p>
-                    ${s.higher ? `<div style="font-size:0.85em; margin-top:8px;"><b>Ai livelli più alti:</b> ${s.higher}</div>` : ''}
-                    <div style="margin-top:10px; display:flex; gap:8px;">
-                        <button onclick="editSpell(${s.id})" class="btn" style="flex:1; background:#ff9800; color:white;">Modifica</button>
-                        <button onclick="deleteSpell(${s.id})" class="btn" style="flex:1; background:#f44336; color:white;">Elimina</button>
+                    <p style="font-size:0.9em; white-space:pre-wrap; background:rgba(0,0,0,0.03); padding:8px;">${s.effect}</p>
+                    <div style="display:flex; gap:5px; margin-top:10px;">
+                        <button onclick="editSpell(${s.id})" class="btn" style="flex:1; background:#ff9800; color:white; font-size:0.8em;">Edit</button>
+                        <button onclick="deleteSpell(${s.id})" class="btn" style="flex:1; background:#f44336; color:white; font-size:0.8em;">Del</button>
                     </div>
                 </div>`;
         });
@@ -240,36 +271,25 @@
         document.getElementById('nameIta').value = s.nameIta;
         document.getElementById('nameEng').value = s.nameEng;
         document.getElementById('level').value = s.level;
-        document.getElementById('school').value = s.school;
         document.getElementById('isRitual').checked = s.ritual;
         document.getElementById('isConc').checked = s.conc;
-        document.getElementById('castingTime').value = s.cast;
-        document.getElementById('range').value = s.range;
-        document.getElementById('duration').value = s.duration;
-        document.getElementById('compV').checked = s.comp.v;
-        document.getElementById('compS').checked = s.comp.s;
         document.getElementById('compM').checked = s.comp.m;
         document.getElementById('materialDesc').value = s.mats;
         document.getElementById('effectDesc').value = s.effect;
         document.getElementById('higherLevels').value = s.higher;
-        document.getElementById('matBox').style.display = s.comp.m ? 'block' : 'none';
-        currentImg = s.image;
-        document.getElementById('btnSave').innerText = "💾 Aggiorna Incantesimo";
+        
+        document.querySelectorAll('#classCreateGrid .toggle-btn').forEach(b => {
+            b.classList.toggle('selected', s.classes.includes(b.getAttribute('data-val')));
+        });
+
+        document.getElementById('btnSave').innerText = "💾 Aggiorna";
         window.scrollTo(0,0);
     }
 
-    function resetFilters() {
-        document.getElementById('searchBar').value = '';
-        document.getElementById('filterLevel').selectedIndex = -1;
-        document.getElementById('filterClass').selectedIndex = -1;
-        renderAll();
-    }
-
     function exportJSON() {
-        const blob = new Blob([JSON.stringify(spells)], {type: 'application/json'});
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'compendio_dnd.json';
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(spells)]));
+        a.download = 'compendio.json';
         a.click();
     }
 
@@ -285,9 +305,13 @@
 
     function deleteSpell(id) { if(confirm("Cancellare?")) { spells = spells.filter(s => s.id !== id); localStorage.setItem('dnd_vFinal_spells', JSON.stringify(spells)); renderAll(); } }
 
-    const cS = document.getElementById('classesSelect');
-    const fC = document.getElementById('filterClass');
-    CLASS_LIST.forEach(c => { cS.add(new Option(c, c)); fC.add(new Option(c, c)); });
+    // Init
+    const createGrid = document.getElementById('classCreateGrid');
+    const filterGrid = document.getElementById('filterClassGrid');
+    CLASS_LIST.forEach(c => {
+        createGrid.innerHTML += `<div class="toggle-btn" data-val="${c}" onclick="this.classList.toggle('selected')">${c}</div>`;
+        filterGrid.innerHTML += `<div class="toggle-btn" data-val="${c}" onclick="toggleFilterVal(this, 'class')">${c}</div>`;
+    });
 
     renderAll();
 </script>
