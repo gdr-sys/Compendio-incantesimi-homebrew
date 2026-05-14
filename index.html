@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grimorio Homebrew Definitivo</title>
+    <title>Compendio incantesimi Homebrew</title>
     <style>
         :root[data-theme="light"] {
             --primary: #8b0000; --bg: #f4ece1; --card-bg: #fffdfa;
@@ -59,7 +59,7 @@
 
 <div class="container">
     <header>
-        <h1>📖 Grimorio Master</h1>
+        <h1>📖 Compendio incantesimi Homebrew</h1>
         <div style="display:flex; gap:10px;">
             <button onclick="exportData()" class="btn" style="background:#4a90e2; color:white;">Export</button>
             <button onclick="document.getElementById('importFile').click()" class="btn" style="background:#7ed321; color:white;">Import</button>
@@ -94,8 +94,8 @@
 
         <!-- TOGGLE RITUALE / CONCENTRAZIONE / COMPONENTI -->
         <div class="full-width" style="display:flex; gap:15px; background:rgba(0,0,0,0.05); padding:10px; border-radius:4px; flex-wrap: wrap;">
-            <label><input type="checkbox" id="isRitual"> 🕯️ Rituale</label>
-            <label><input type="checkbox" id="isConc"> 🧠 Concentrazione</label>
+            <label><input type="checkbox" id="isRitual"> Rit.</label>
+            <label><input type="checkbox" id="isConc"> C</label>
             <label><input type="checkbox" id="compV"> V</label>
             <label><input type="checkbox" id="compS"> S</label>
             <label><input type="checkbox" id="compM" onchange="document.getElementById('matIn').classList.toggle('hidden', !this.checked)"> M</label>
