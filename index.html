@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compendio incantesimi Homebrew</title>
+    <title>Compendio Incantesimi Homebrew</title>
     <style>
         :root[data-theme="light"] {
             --primary: #8b0000; --bg: #f4ece1; --card-bg: #fffdfa;
@@ -59,7 +59,7 @@
 
 <div class="container">
     <header>
-        <h1>📖 Compendio incantesimi Homebrew</h1>
+        <h1>📖 Compendio Incantesimi Homebrew</h1>
         <div style="display:flex; gap:10px;">
             <button onclick="exportData()" class="btn" style="background:#4a90e2; color:white;">Export</button>
             <button onclick="document.getElementById('importFile').click()" class="btn" style="background:#7ed321; color:white;">Import</button>
@@ -108,6 +108,11 @@
             <label>Classi:</label>
             <div id="createClassGrid" class="toggle-grid"></div>
         </div>
+
+        <div style="display:flex; gap:10px; margin-top:10px;">
+    <input type="text" id="newClassName" placeholder="Aggiungi classe custom (es: Blood Hunter)" style="flex:1;">
+    <button type="button" onclick="addNewClass()" class="btn" style="background:var(--accent); color:white;">+</button>
+</div>
 
         <textarea id="effectDesc" class="full-width" rows="4" placeholder="Descrizione dell'effetto..."></textarea>
         <textarea id="higherLevels" class="full-width" rows="2" placeholder="Ai livelli più alti..."></textarea>
@@ -160,8 +165,12 @@
     let pinnedIds = JSON.parse(localStorage.getItem('grim_master_pins')) || [];
     let currentImg = "";
     let filterState = { levels: [], classes: [] };
-    const CLASSES = ["Artificiere", "Bardo", "Chierico", "Druido", "Guerriero (E.K.)", "Ladro (A.T.)", "Mago", "Paladino", "Ranger", "Stregone", "Warlock"];
+    // Cerca le classi salvate, altrimenti usa quelle base
+let CLASSES = JSON.parse(localStorage.getItem('grim_custom_classes')) || ["Artificiere", "Bardo", "Chierico", "Druido", "Mago", "Paladino", "Ranger", "Stregone", "Warlock"];
 
+// E nella funzione addNewClass(), aggiungi questa riga alla fine:
+localStorage.setItem('grim_custom_classes', JSON.stringify(CLASSES));
+    
     function toggleTheme() {
         const root = document.documentElement;
         root.setAttribute('data-theme', root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
@@ -207,6 +216,37 @@
         }
     }
 
+function addNewClass() {
+    const input = document.getElementById('newClassName');
+    const className = input.value.trim();
+    
+    if (className && !CLASSES.includes(className)) {
+        // Aggiunge all'array globale
+        CLASSES.push(className);
+        
+        // Aggiorna le due griglie (quella del form e quella dei filtri)
+        ['createClassGrid', 'filterClassGrid'].forEach(gid => {
+            const c = document.getElementById(gid);
+            const click = gid.includes('create') ? "this.classList.toggle('selected')" : "handleFilterClick(this, 'classes')";
+            
+            // Crea il nuovo pulsante
+            const btn = document.createElement('div');
+            btn.className = 'toggle-btn';
+            btn.setAttribute('data-val', className);
+            btn.onclick = function() { 
+                if(gid.includes('create')) this.classList.toggle('selected');
+                else handleFilterClick(this, 'classes');
+            };
+            btn.innerText = className;
+            c.appendChild(btn);
+        });
+        
+        input.value = ""; // Pulisce il campo
+    } else {
+        alert("Inserisci un nome valido o classe già esistente.");
+    }
+}
+    
     function saveSpell() {
         const id = document.getElementById('editId').value ? parseInt(document.getElementById('editId').value) : Date.now();
         const selClasses = Array.from(document.querySelectorAll('#createClassGrid .toggle-btn.selected')).map(b => b.getAttribute('data-val'));
