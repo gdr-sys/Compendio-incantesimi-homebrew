@@ -10,7 +10,7 @@ L'app è costruita per essere **totalmente portatile**: è contenuta in un singo
 
 - **Editor Professionale**: Campi specifici per ogni dettaglio (Nome ITA/ENG, Scuola, Gittata, Durata, Ai livelli più alti).
 - **Dark & Light Mode**: Interfaccia adattiva per non affaticare la vista durante le sessioni notturne.
-- **Supporto Immagini**: Carica illustrazioni per le tue spell. Le immagini vengono salvate all'interno del file JSON tramite codifica Base64.
+- **Supporto Immagini**: Carica illustrazioni per le tue spell.
 - **Gestione Classi Homebrew**: Aggiungi classi personalizzate dinamicamente direttamente dalla tendina.
 - **Parametri Tecnici**: Toggle dedicati per **Concentrazione**, **Rituale** e **Componenti (V, S, M)** con specifica dei materiali.
 - **Import/Export Universale**: Salva l'intero grimorio (incluse classi e immagini) in un file `.json` per trasferirlo su altri dispositivi o browser.
