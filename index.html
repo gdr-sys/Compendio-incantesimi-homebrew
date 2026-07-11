@@ -479,8 +479,8 @@ footer.footer-noemi {
     </div>
     <div class="topbar-actions">
       <button class="icon-btn" onclick="toggleTheme()" title="Cambia tema chiaro/scuro">🌓</button>
-      <button class="icon-btn" onclick="exportData()" title="Esporta il grimorio (JSON)">⇩</button>
-      <button class="icon-btn" onclick="document.getElementById('importFile').click()" title="Importa un grimorio (JSON)">⇧</button>
+      <button class="icon-btn" onclick="exportData()" title="Esporta il grimorio (JSON)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12"/><path d="M6 12l6 6 6-6"/><path d="M5 21h14"/></svg></button>
+      <button class="icon-btn" onclick="document.getElementById('importFile').click()" title="Importa un grimorio (JSON)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V8"/><path d="M6 12l6-6 6 6"/><path d="M5 21h14"/></svg></button>
       <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
       <button class="icon-btn" onclick="if(confirm('Cancellare TUTTI gli incantesimi salvati? L\'azione non è reversibile.')) resetCompendio()" title="Reset totale">🗑️</button>
       <button class="btn btn-violet" onclick="openBackModal()">🎨 Stile carte</button>
@@ -489,9 +489,12 @@ footer.footer-noemi {
   </header>
 
   <section class="toolbar">
-    <div class="search-wrap">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-      <input id="searchBar" placeholder="Cerca un incantesimo per nome..." onkeyup="render()">
+    <div class="search-wrap" style="display:flex; gap:10px; align-items:stretch; flex-wrap:wrap;">
+      <div style="position:relative; flex:1; min-width:220px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); opacity:.5; pointer-events:none;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="searchBar" placeholder="Cerca un incantesimo per nome..." onkeyup="render()" style="width:100%;">
+      </div>
+      <button class="btn btn-ghost" onclick="openSrdModal()" style="white-space:nowrap;">📖 Sfoglia tutti</button>
     </div>
     <div class="filter-toggle-row">
       <button class="filter-toggle" id="filterToggleBtn" onclick="toggleFilterPanel()">
@@ -659,6 +662,23 @@ footer.footer-noemi {
 </div>
 
 <!-- ============ MODAL: STAMPA / PDF ============ -->
+<!-- ============ MODAL: SFOGLIA TUTTI (SRD) ============ -->
+<div class="modal-overlay" id="srdModal" onclick="if(event.target===this) closeSrdModal()">
+  <div class="modal">
+    <h2>📖 Sfoglia tutti gli incantesimi SRD</h2>
+    <p class="modal-sub">Elenco completo degli incantesimi ufficiali. Usa la ricerca per nome, poi premi + per aggiungerne uno al tuo grimorio (potrai poi modificarlo liberamente).</p>
+    <div class="search-wrap" style="margin-bottom:12px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="srdSearchBar" placeholder="Cerca un incantesimo per nome..." oninput="renderSrdModalList()">
+    </div>
+    <div class="pdf-spell-list" id="srdModalList" style="max-height:50vh;"></div>
+    <div style="display:flex; gap:10px; margin-top:14px;">
+      <button onclick="closeSrdModal()" class="btn btn-ghost" style="flex:1;">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: STAMPA CARTE ============ -->
 <div class="modal-overlay" id="pdfModal" onclick="if(event.target===this) closePdfModal()">
   <div class="modal">
     <h2>🖨️ Stampa carte incantesimo</h2>
@@ -1223,12 +1243,63 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
     // ============================================================
     // AUTOCOMPLETE SRD
     // ============================================================
+    function openSrdModal() {
+        document.getElementById('srdSearchBar').value = '';
+        renderSrdModalList();
+        document.getElementById('srdModal').classList.add('open');
+    }
+    function closeSrdModal() { document.getElementById('srdModal').classList.remove('open'); }
+    function renderSrdModalList() {
+        const q = document.getElementById('srdSearchBar').value.toLowerCase();
+        const matches = SRD_SPELLS.filter(s => s.nome.toLowerCase().includes(q))
+            .sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
+        const box = document.getElementById('srdModalList');
+        if (matches.length === 0) { box.innerHTML = '<p style="padding:14px; font-family:var(--font-ui); font-size:.85rem; color:var(--ink-muted);">Nessun incantesimo trovato.</p>'; return; }
+        box.innerHTML = matches.map(s => `
+            <label style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 13px; border-bottom:1px solid var(--border-soft); font-family:var(--font-ui); font-size:.88rem;">
+                <span>${s.nome} <span class="ac-edition">${s.edizione} · ${s.livello === 0 ? 'Trucchetto' : s.livello + '°'} · ${s.scuola}</span></span>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="addSrdToGrimoire('${s.id.replace(/'/g, "\\'")}')">+ Aggiungi</button>
+            </label>`).join('');
+    }
+    function addSrdToGrimoire(id) {
+        const s = SRD_SPELLS.find(x => x.id === id);
+        if (!s) return;
+        const data = {
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            nameIta: s.nome,
+            nameEng: s.nome,
+            edition: s.edizione,
+            level: s.livello,
+            school: s.scuola,
+            ritual: s.rituale,
+            conc: s.concentrazione,
+            cast: s.tempo_lancio,
+            range: s.gittata,
+            duration: s.durata,
+            comp: { v: s.comp.v, s: s.comp.s, m: s.comp.m },
+            mats: s.materiali || '',
+            classes: s.classi || [],
+            effect: s.descrizione,
+            higher: s.livelli_superiori || '',
+            image: ''
+        };
+        spells.push(data);
+        localStorage.setItem('grim_master_v1', JSON.stringify(spells));
+        toast(`"${s.nome}" aggiunto al grimorio`, '📜');
+        render();
+    }
+
     function handleNameInput(val) {
         const list = document.getElementById('acList');
         if (!val || val.length < 2) { list.style.display = 'none'; return; }
         const q = val.toLowerCase();
-        const matches = SRD_SPELLS.filter(s => s.nome.toLowerCase().includes(q)).slice(0, 10);
+        const matches = SRD_SPELLS.filter(s => s.nome.toLowerCase().includes(q))
+            .sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
         if (matches.length === 0) { list.style.display = 'none'; return; }
+        renderAcList(matches);
+    }
+    function renderAcList(matches) {
+        const list = document.getElementById('acList');
         list.innerHTML = matches.map(s => `
             <div class="autocomplete-item" onclick="fillFromSRD('${s.id.replace(/'/g, "\\'")}')">
                 ${s.nome} <span class="ac-edition">${s.edizione}</span>
