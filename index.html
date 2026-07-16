@@ -657,6 +657,40 @@ footer.footer-noemi {
       </div>
     </fieldset>
 
+    <fieldset>
+      <legend>Immagine per il retro "dati incantesimo" (opzionale)</legend>
+      <p class="field-hint" style="margin-top:-4px; margin-bottom:10px;">Usata solo se nello stile delle carte attivi il retro con nome e tabellina. Se la lasci vuota, verrà riusata l'immagine del fronte.</p>
+
+      <div id="backSpellImgEditorWrap" class="hidden">
+        <div class="front-img-frame" id="backSpellImgFrame" style="aspect-ratio: 63/60;">
+          <div id="backSpellImgLayer" class="front-img-layer"></div>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:8px;">
+          <span class="res-badge hidden" id="backSpellImgResBadge"></span>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="resetBackSpellImgPosition()">↺ Centra e adatta</button>
+        </div>
+        <div class="zoom-row" style="margin-top:8px;">
+          <span style="font-family:var(--font-ui); font-size:.78rem;">🔍−</span>
+          <input type="range" id="backSpellImgZoom" min="100" max="400" value="100" oninput="updateBackSpellImgZoom(this.value)">
+          <span style="font-family:var(--font-ui); font-size:.78rem;">🔍+</span>
+        </div>
+        <p class="field-hint">Trascina l'immagine per riposizionarla.</p>
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeBackSpellImg()">✕ Rimuovi immagine</button>
+      </div>
+
+      <div id="backSpellImgUploadWrap">
+        <label class="img-drop" for="backSpellImgInput">📷 Carica da file</label>
+        <input type="file" id="backSpellImgInput" accept="image/*" class="hidden" onchange="handleBackSpellImg(event)">
+        <div style="margin:10px 0; text-align:center; font-family:var(--font-ui); font-size:.78rem; color:var(--ink-muted);">— oppure —</div>
+        <label class="field-label">Incolla URL immagine</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="backSpellImgUrlInput" placeholder="https://...">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="handleBackSpellImgUrl()">Carica</button>
+        </div>
+        <p class="field-hint">📐 Dimensioni minime consigliate: 750 × 710 px (equivalenti a 300 DPI sulla fascia immagine del retro).</p>
+      </div>
+    </fieldset>
+
     <button onclick="saveSpell()" class="btn btn-primary btn-block" id="btnSave">📜 Salva nel Grimorio</button>
   </aside>
 </div>
@@ -744,12 +778,62 @@ footer.footer-noemi {
             <div class="back-img hidden" id="backImgEl"></div>
             <div id="presetPreviewLayer" class="hidden" style="position:absolute; inset:0;"></div>
             <div id="backOverlayLayer" style="position:absolute; inset:0; pointer-events:none;"></div>
+            <div id="perSpellPreviewLayer" class="hidden" style="position:absolute; inset:0; overflow:hidden;"></div>
           </div>
           <span class="res-badge hidden" id="resBadge"></span>
           <button class="btn btn-ghost btn-sm" onclick="resetBackImagePosition()">↺ Centra e adatta</button>
         </div>
 
         <div>
+          <div class="back-toggle-box" style="margin:0 0 16px;">
+            <p><b>Retro con dati dell'incantesimo</b><br>Invece del retro decorativo uguale per tutto il mazzo, ogni carta avrà sul retro l'immagine, il nome e una tabellina con livello, tipo di azione, raggio, concentrazione, durata e scuola.</p>
+            <label class="switch">
+              <input type="checkbox" id="perSpellBackToggle" onchange="onPerSpellBackToggle()">
+              <span class="switch-track"></span>
+            </label>
+          </div>
+          <div id="perSpellPreviewControls" class="hidden" style="margin:0 0 16px;">
+            <span class="field-label">Immagine da usare sul retro</span>
+            <div class="chip-row" style="margin-bottom:12px;">
+              <div class="chip" id="imgSourcePerSpellChip" onclick="setBackImageSource('perSpell')">Per singolo incantesimo</div>
+              <div class="chip" id="imgSourceSharedChip" onclick="setBackImageSource('shared')">Un'unica immagine per tutte</div>
+            </div>
+
+            <div id="sharedBackImgSection" class="hidden">
+              <div id="sharedBackImgEditorWrap" class="hidden">
+                <div class="front-img-frame" id="sharedBackImgFrame" style="aspect-ratio: 63/60;">
+                  <div id="sharedBackImgLayer" class="front-img-layer"></div>
+                </div>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:8px;">
+                  <span class="res-badge hidden" id="sharedBackImgResBadge"></span>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="resetSharedBackImgPosition()">↺ Centra e adatta</button>
+                </div>
+                <div class="zoom-row" style="margin-top:8px;">
+                  <span style="font-family:var(--font-ui); font-size:.78rem;">🔍−</span>
+                  <input type="range" id="sharedBackImgZoom" min="100" max="400" value="100" oninput="updateSharedBackImgZoom(this.value)">
+                  <span style="font-family:var(--font-ui); font-size:.78rem;">🔍+</span>
+                </div>
+                <p class="field-hint">Trascina l'immagine per riposizionarla — verrà usata identica su tutti i retri.</p>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeSharedBackImg()">✕ Rimuovi immagine</button>
+              </div>
+              <div id="sharedBackImgUploadWrap">
+                <label class="img-drop" for="sharedBackImgInput">📷 Carica da file</label>
+                <input type="file" id="sharedBackImgInput" accept="image/*" class="hidden" onchange="handleSharedBackImg(event)">
+                <div style="margin:10px 0; text-align:center; font-family:var(--font-ui); font-size:.78rem; color:var(--ink-muted);">— oppure —</div>
+                <label class="field-label">Incolla URL immagine</label>
+                <div style="display:flex; gap:8px;">
+                  <input type="text" id="sharedBackImgUrlInput" placeholder="https://...">
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="handleSharedBackImgUrl()">Carica</button>
+                </div>
+                <p class="field-hint">📐 Dimensioni minime consigliate: 750 × 710 px (equivalenti a 300 DPI sulla fascia immagine del retro).</p>
+              </div>
+            </div>
+
+            <label class="field-label" style="margin-top:14px;">Anteprima con l'incantesimo</label>
+            <select id="perSpellPreviewPicker" onchange="renderPerSpellBackPreview()"></select>
+            <p class="field-hint">Solo per l'anteprima qui accanto: nome e tabellina restano sempre quelli della singola carta.</p>
+          </div>
+          <div id="genericBackDesignerWrap">
           <div class="mode-tabs">
             <div class="mode-tab active" id="tabImage" onclick="switchBackMode('image')">Immagine</div>
             <div class="mode-tab" id="tabPattern" onclick="switchBackMode('pattern')">Pattern &amp; colori</div>
@@ -825,6 +909,7 @@ footer.footer-noemi {
               <span>Cornice ornamentale</span>
             </div>
           </div>
+          </div>
         </div>
       </div>
     </div>
@@ -896,10 +981,13 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
 
     // Card back design state
     const DEFAULT_PATTERN = { colorA: '#6B4FA0', colorB: '#2C1D4A', patternType: 'none', decoColor: 'light', showIcon: true, icon: '✦', showText: false, text: '', ornateBorder: true };
-    let backDesign = JSON.parse(localStorage.getItem('grim_card_back')) || { mode: 'pattern', image: null, pattern: DEFAULT_PATTERN };
+    let backDesign = JSON.parse(localStorage.getItem('grim_card_back')) || { mode: 'pattern', image: null, pattern: DEFAULT_PATTERN, perSpell: false };
     if (!backDesign.pattern) backDesign.pattern = Object.assign({}, DEFAULT_PATTERN);
     if (backDesign.pattern.decoColor === undefined) backDesign.pattern.decoColor = 'light';
     if (backDesign.mode === 'preset') backDesign.mode = 'pattern'; // migrate old versions
+    if (backDesign.perSpell === undefined) backDesign.perSpell = false;
+    if (backDesign.imageSource === undefined) backDesign.imageSource = 'perSpell';
+    if (!backDesign.sharedImage) backDesign.sharedImage = { src: '', naturalW: 0, naturalH: 0, coverPercent: 100, zoom: 100, posX: 50, posY: 50 };
     let backMode = backDesign.mode || 'pattern';
     let backImgState = backDesign.image || { src: '', naturalW: 0, naturalH: 0, coverPercent: 100, zoom: 100, posX: 50, posY: 50 };
     let faceMode = 'back';
@@ -1070,6 +1158,8 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
       document.querySelectorAll('#createClassGrid .toggle-btn').forEach(b => b.classList.remove('selected'));
       currentImgState = normalizeImageState('');
       updateFrontImgUI();
+      currentBackImgState = normalizeImageState('');
+      updateBackSpellImgUI();
       document.getElementById('formTitle').textContent = '📜 Nuovo Incantesimo';
       document.getElementById('btnSave').innerHTML = '📜 Salva nel Grimorio';
     }
@@ -1195,6 +1285,270 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         document.getElementById('imgInput').value = '';
         document.getElementById('imgUrlInput').value = '';
         updateFrontImgUI();
+    }
+
+    // ============================================================
+    // IMAGE (RETRO "DATI INCANTESIMO") — upload/URL + zoom & pan, same pattern as the front editor
+    // ============================================================
+    const BACK_SPELL_IMG_MIN_W = 750, BACK_SPELL_IMG_MIN_H = 710; // ~300dpi on the back's (now taller) image band
+    let currentBackImgState = normalizeImageState('');
+    function handleBackSpellImg(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => loadBackSpellImage(reader.result);
+        reader.readAsDataURL(file);
+    }
+    function handleBackSpellImgUrl() {
+        const url = document.getElementById('backSpellImgUrlInput').value.trim();
+        if (!url) return;
+        loadBackSpellImage(url);
+    }
+    function loadBackSpellImage(src) {
+        const probe = new Image();
+        probe.onload = () => {
+            currentBackImgState.src = src;
+            currentBackImgState.naturalW = probe.naturalWidth;
+            currentBackImgState.naturalH = probe.naturalHeight;
+            const frame = document.getElementById('backSpellImgFrame');
+            const containerRatio = frame.clientWidth / frame.clientHeight;
+            const imgRatio = probe.naturalWidth / probe.naturalHeight;
+            currentBackImgState.coverPercent = 100 * Math.max(1, imgRatio / containerRatio);
+            currentBackImgState.zoom = 100;
+            currentBackImgState.posX = 50;
+            currentBackImgState.posY = 50;
+            updateBackSpellImgUI();
+            toast('Immagine caricata', '🖼️');
+        };
+        probe.onerror = () => { toast("Impossibile caricare l'immagine (controlla l'URL)", '⚠️'); };
+        probe.src = src;
+    }
+    function updateBackSpellImgUI() {
+        const has = !!currentBackImgState.src;
+        document.getElementById('backSpellImgEditorWrap').classList.toggle('hidden', !has);
+        document.getElementById('backSpellImgUploadWrap').classList.toggle('hidden', has);
+        if (has) {
+            document.getElementById('backSpellImgZoom').value = currentBackImgState.zoom;
+            applyBackSpellImgTransform();
+            updateBackSpellImgResBadge();
+        }
+    }
+    function applyBackSpellImgTransform() {
+        const el = document.getElementById('backSpellImgLayer');
+        if (!currentBackImgState.src) return;
+        const size = (currentBackImgState.coverPercent || 100) * (currentBackImgState.zoom || 100) / 100;
+        el.style.backgroundImage = `url("${currentBackImgState.src}")`;
+        el.style.backgroundSize = size + '%';
+        el.style.backgroundPosition = `${currentBackImgState.posX ?? 50}% ${currentBackImgState.posY ?? 50}%`;
+    }
+    function updateBackSpellImgZoom(val) {
+        currentBackImgState.zoom = parseFloat(val);
+        applyBackSpellImgTransform();
+        updateBackSpellImgResBadge();
+    }
+    function resetBackSpellImgPosition() {
+        currentBackImgState.zoom = 100;
+        currentBackImgState.posX = 50;
+        currentBackImgState.posY = 50;
+        document.getElementById('backSpellImgZoom').value = 100;
+        applyBackSpellImgTransform();
+        updateBackSpellImgResBadge();
+    }
+    function updateBackSpellImgResBadge() {
+        const badge = document.getElementById('backSpellImgResBadge');
+        if (!currentBackImgState.naturalW) { badge.classList.add('hidden'); return; }
+        const effectiveZoom = (currentBackImgState.zoom || 100) / 100;
+        const ok = currentBackImgState.naturalW >= BACK_SPELL_IMG_MIN_W * effectiveZoom && currentBackImgState.naturalH >= BACK_SPELL_IMG_MIN_H * effectiveZoom;
+        badge.classList.remove('hidden');
+        badge.className = 'res-badge ' + (ok ? 'res-good' : 'res-low');
+        badge.textContent = ok
+            ? `✓ Ottima risoluzione (${currentBackImgState.naturalW}×${currentBackImgState.naturalH}px)`
+            : `⚠ Risoluzione bassa (${currentBackImgState.naturalW}×${currentBackImgState.naturalH}px, consigliati ${BACK_SPELL_IMG_MIN_W}×${BACK_SPELL_IMG_MIN_H}px)`;
+    }
+    (function initBackSpellImgDrag(){
+        let drag = null;
+        function start(x, y) {
+            const frame = document.getElementById('backSpellImgFrame');
+            if (!currentBackImgState.src) return;
+            const rect = frame.getBoundingClientRect();
+            const size = (currentBackImgState.coverPercent || 100) * (currentBackImgState.zoom || 100) / 100;
+            const bgWidthPx = rect.width * size / 100;
+            const bgHeightPx = bgWidthPx * (currentBackImgState.naturalH / currentBackImgState.naturalW);
+            drag = {
+                startX: x, startY: y,
+                startPosX: currentBackImgState.posX ?? 50, startPosY: currentBackImgState.posY ?? 50,
+                rangeX: bgWidthPx - rect.width, rangeY: bgHeightPx - rect.height
+            };
+            frame.classList.add('dragging');
+        }
+        function move(x, y) {
+            if (!drag) return;
+            const dx = x - drag.startX, dy = y - drag.startY;
+            if (drag.rangeX > 0) currentBackImgState.posX = Math.max(0, Math.min(100, drag.startPosX - (dx / drag.rangeX) * 100));
+            if (drag.rangeY > 0) currentBackImgState.posY = Math.max(0, Math.min(100, drag.startPosY - (dy / drag.rangeY) * 100));
+            applyBackSpellImgTransform();
+        }
+        function end() { drag = null; const f = document.getElementById('backSpellImgFrame'); if (f) f.classList.remove('dragging'); }
+        document.addEventListener('mousedown', e => { if (e.target.closest('#backSpellImgFrame')) { start(e.clientX, e.clientY); e.preventDefault(); } });
+        window.addEventListener('mousemove', e => move(e.clientX, e.clientY));
+        window.addEventListener('mouseup', end);
+        document.addEventListener('touchstart', e => { if (e.target.closest('#backSpellImgFrame')) { const t = e.touches[0]; start(t.clientX, t.clientY); } }, { passive: true });
+        window.addEventListener('touchmove', e => { if (drag) { const t = e.touches[0]; move(t.clientX, t.clientY); } }, { passive: true });
+        window.addEventListener('touchend', end);
+        document.addEventListener('wheel', e => {
+            if (!e.target.closest('#backSpellImgFrame') || !currentBackImgState.src) return;
+            e.preventDefault();
+            const slider = document.getElementById('backSpellImgZoom');
+            let v = parseFloat(slider.value) + (e.deltaY < 0 ? 8 : -8);
+            v = Math.max(100, Math.min(400, v));
+            slider.value = v;
+            updateBackSpellImgZoom(v);
+        }, { passive: false });
+    })();
+    function removeBackSpellImg() {
+        currentBackImgState = normalizeImageState('');
+        document.getElementById('backSpellImgInput').value = '';
+        document.getElementById('backSpellImgUrlInput').value = '';
+        updateBackSpellImgUI();
+    }
+
+    // ============================================================
+    // IMAGE (RETRO "DATI INCANTESIMO") — shared variant, one image for the whole deck
+    // ============================================================
+    const SHARED_BACK_IMG_MIN_W = 750, SHARED_BACK_IMG_MIN_H = 710;
+    let sharedBackImgState = normalizeImageState(backDesign.sharedImage);
+
+    function setBackImageSource(mode) {
+        backDesign.imageSource = mode;
+        document.getElementById('imgSourcePerSpellChip').classList.toggle('selected', mode === 'perSpell');
+        document.getElementById('imgSourceSharedChip').classList.toggle('selected', mode === 'shared');
+        document.getElementById('sharedBackImgSection').classList.toggle('hidden', mode !== 'shared');
+        if (mode === 'shared') updateSharedBackImgUI();
+        renderPerSpellBackPreview();
+    }
+
+    function handleSharedBackImg(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => loadSharedBackImage(reader.result);
+        reader.readAsDataURL(file);
+    }
+    function handleSharedBackImgUrl() {
+        const url = document.getElementById('sharedBackImgUrlInput').value.trim();
+        if (!url) return;
+        loadSharedBackImage(url);
+    }
+    function loadSharedBackImage(src) {
+        const probe = new Image();
+        probe.onload = () => {
+            sharedBackImgState.src = src;
+            sharedBackImgState.naturalW = probe.naturalWidth;
+            sharedBackImgState.naturalH = probe.naturalHeight;
+            const frame = document.getElementById('sharedBackImgFrame');
+            const containerRatio = frame.clientWidth / frame.clientHeight;
+            const imgRatio = probe.naturalWidth / probe.naturalHeight;
+            sharedBackImgState.coverPercent = 100 * Math.max(1, imgRatio / containerRatio);
+            sharedBackImgState.zoom = 100;
+            sharedBackImgState.posX = 50;
+            sharedBackImgState.posY = 50;
+            updateSharedBackImgUI();
+            toast('Immagine caricata', '🖼️');
+        };
+        probe.onerror = () => { toast("Impossibile caricare l'immagine (controlla l'URL)", '⚠️'); };
+        probe.src = src;
+    }
+    function updateSharedBackImgUI() {
+        const has = !!sharedBackImgState.src;
+        document.getElementById('sharedBackImgEditorWrap').classList.toggle('hidden', !has);
+        document.getElementById('sharedBackImgUploadWrap').classList.toggle('hidden', has);
+        if (has) {
+            document.getElementById('sharedBackImgZoom').value = sharedBackImgState.zoom;
+            applySharedBackImgTransform();
+            updateSharedBackImgResBadge();
+        }
+        renderPerSpellBackPreview();
+    }
+    function applySharedBackImgTransform() {
+        const el = document.getElementById('sharedBackImgLayer');
+        if (!sharedBackImgState.src) return;
+        const size = (sharedBackImgState.coverPercent || 100) * (sharedBackImgState.zoom || 100) / 100;
+        el.style.backgroundImage = `url("${sharedBackImgState.src}")`;
+        el.style.backgroundSize = size + '%';
+        el.style.backgroundPosition = `${sharedBackImgState.posX ?? 50}% ${sharedBackImgState.posY ?? 50}%`;
+    }
+    function updateSharedBackImgZoom(val) {
+        sharedBackImgState.zoom = parseFloat(val);
+        applySharedBackImgTransform();
+        updateSharedBackImgResBadge();
+        renderPerSpellBackPreview();
+    }
+    function resetSharedBackImgPosition() {
+        sharedBackImgState.zoom = 100;
+        sharedBackImgState.posX = 50;
+        sharedBackImgState.posY = 50;
+        document.getElementById('sharedBackImgZoom').value = 100;
+        applySharedBackImgTransform();
+        updateSharedBackImgResBadge();
+        renderPerSpellBackPreview();
+    }
+    function updateSharedBackImgResBadge() {
+        const badge = document.getElementById('sharedBackImgResBadge');
+        if (!sharedBackImgState.naturalW) { badge.classList.add('hidden'); return; }
+        const effectiveZoom = (sharedBackImgState.zoom || 100) / 100;
+        const ok = sharedBackImgState.naturalW >= SHARED_BACK_IMG_MIN_W * effectiveZoom && sharedBackImgState.naturalH >= SHARED_BACK_IMG_MIN_H * effectiveZoom;
+        badge.classList.remove('hidden');
+        badge.className = 'res-badge ' + (ok ? 'res-good' : 'res-low');
+        badge.textContent = ok
+            ? `✓ Ottima risoluzione (${sharedBackImgState.naturalW}×${sharedBackImgState.naturalH}px)`
+            : `⚠ Risoluzione bassa (${sharedBackImgState.naturalW}×${sharedBackImgState.naturalH}px, consigliati ${SHARED_BACK_IMG_MIN_W}×${SHARED_BACK_IMG_MIN_H}px)`;
+    }
+    (function initSharedBackImgDrag(){
+        let drag = null;
+        function start(x, y) {
+            const frame = document.getElementById('sharedBackImgFrame');
+            if (!sharedBackImgState.src) return;
+            const rect = frame.getBoundingClientRect();
+            const size = (sharedBackImgState.coverPercent || 100) * (sharedBackImgState.zoom || 100) / 100;
+            const bgWidthPx = rect.width * size / 100;
+            const bgHeightPx = bgWidthPx * (sharedBackImgState.naturalH / sharedBackImgState.naturalW);
+            drag = {
+                startX: x, startY: y,
+                startPosX: sharedBackImgState.posX ?? 50, startPosY: sharedBackImgState.posY ?? 50,
+                rangeX: bgWidthPx - rect.width, rangeY: bgHeightPx - rect.height
+            };
+            frame.classList.add('dragging');
+        }
+        function move(x, y) {
+            if (!drag) return;
+            const dx = x - drag.startX, dy = y - drag.startY;
+            if (drag.rangeX > 0) sharedBackImgState.posX = Math.max(0, Math.min(100, drag.startPosX - (dx / drag.rangeX) * 100));
+            if (drag.rangeY > 0) sharedBackImgState.posY = Math.max(0, Math.min(100, drag.startPosY - (dy / drag.rangeY) * 100));
+            applySharedBackImgTransform();
+            renderPerSpellBackPreview();
+        }
+        function end() { drag = null; const f = document.getElementById('sharedBackImgFrame'); if (f) f.classList.remove('dragging'); }
+        document.addEventListener('mousedown', e => { if (e.target.closest('#sharedBackImgFrame')) { start(e.clientX, e.clientY); e.preventDefault(); } });
+        window.addEventListener('mousemove', e => move(e.clientX, e.clientY));
+        window.addEventListener('mouseup', end);
+        document.addEventListener('touchstart', e => { if (e.target.closest('#sharedBackImgFrame')) { const t = e.touches[0]; start(t.clientX, t.clientY); } }, { passive: true });
+        window.addEventListener('touchmove', e => { if (drag) { const t = e.touches[0]; move(t.clientX, t.clientY); } }, { passive: true });
+        window.addEventListener('touchend', end);
+        document.addEventListener('wheel', e => {
+            if (!e.target.closest('#sharedBackImgFrame') || !sharedBackImgState.src) return;
+            e.preventDefault();
+            const slider = document.getElementById('sharedBackImgZoom');
+            let v = parseFloat(slider.value) + (e.deltaY < 0 ? 8 : -8);
+            v = Math.max(100, Math.min(400, v));
+            slider.value = v;
+            updateSharedBackImgZoom(v);
+        }, { passive: false });
+    })();
+    function removeSharedBackImg() {
+        sharedBackImgState = normalizeImageState('');
+        document.getElementById('sharedBackImgInput').value = '';
+        document.getElementById('sharedBackImgUrlInput').value = '';
+        updateSharedBackImgUI();
     }
 
     // ============================================================
@@ -1386,7 +1740,8 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
             classes: selClasses,
             effect: document.getElementById('effectDesc').value,
             higher: document.getElementById('higherLevels').value,
-            image: currentImgState.src ? Object.assign({}, currentImgState) : ''
+            image: currentImgState.src ? Object.assign({}, currentImgState) : '',
+            backImage: currentBackImgState.src ? Object.assign({}, currentBackImgState) : ''
         };
         if (!data.nameIta) { toast('Inserisci almeno il nome!', '⚠️'); return; }
         const idx = spells.findIndex(x => x.id === id);
@@ -1423,6 +1778,8 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         });
         currentImgState = normalizeImageState(s.image);
         updateFrontImgUI();
+        currentBackImgState = normalizeImageState(s.backImage);
+        updateBackSpellImgUI();
         document.getElementById('formTitle').textContent = '✏️ Modifica Incantesimo';
         document.getElementById('btnSave').innerHTML = '💾 Aggiorna Incantesimo';
         openFormDrawer();
@@ -1605,8 +1962,86 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         renderFrontPresetRow();
         syncFrontControlsFromState();
         renderFrontPreview();
+        document.getElementById('perSpellBackToggle').checked = !!backDesign.perSpell;
+        document.getElementById('genericBackDesignerWrap').classList.toggle('hidden', !!backDesign.perSpell);
+        document.getElementById('perSpellPreviewControls').classList.toggle('hidden', !backDesign.perSpell);
+        document.getElementById('perSpellPreviewLayer').classList.toggle('hidden', !backDesign.perSpell);
+        if (backDesign.perSpell) {
+            document.getElementById('backImgEl').classList.add('hidden');
+            document.getElementById('presetPreviewLayer').classList.add('hidden');
+            document.getElementById('backOverlayLayer').classList.add('hidden');
+            populatePerSpellPreviewPicker();
+            setBackImageSource(backDesign.imageSource || 'perSpell');
+            updateSharedBackImgUI();
+        }
     }
     function closeBackModal() { document.getElementById('backModal').classList.remove('open'); }
+
+    function onPerSpellBackToggle() {
+        var on = document.getElementById('perSpellBackToggle').checked;
+        document.getElementById('genericBackDesignerWrap').classList.toggle('hidden', on);
+        document.getElementById('perSpellPreviewControls').classList.toggle('hidden', !on);
+        document.getElementById('perSpellPreviewLayer').classList.toggle('hidden', !on);
+        document.getElementById('backOverlayLayer').classList.toggle('hidden', on);
+        if (on) {
+            document.getElementById('backImgEl').classList.add('hidden');
+            document.getElementById('presetPreviewLayer').classList.add('hidden');
+            populatePerSpellPreviewPicker();
+            setBackImageSource(backDesign.imageSource || 'perSpell');
+            updateSharedBackImgUI();
+        } else {
+            renderCardFramePreview();
+        }
+    }
+
+    function populatePerSpellPreviewPicker() {
+        var sel = document.getElementById('perSpellPreviewPicker');
+        if (!sel) return;
+        sel.innerHTML = spells.length
+            ? spells.map(function (s) { return '<option value="' + s.id + '">' + (s.nameIta || '(senza nome)') + '</option>'; }).join('')
+            : '<option value="">Nessun incantesimo nel grimorio</option>';
+    }
+
+    // Screen-scaled version of buildBackCardHtmlForSpell (percentages instead of mm/pt),
+    // so the preview fits the small on-screen card-frame regardless of its exact pixel size.
+    function buildBackCardPreviewHtmlForSpell(s) {
+        var lvl = s.level == 0 ? 'Trucchetto' : s.level + '°';
+        var dur = formatDuration(s);
+        var imgSt = backDesign.imageSource === 'shared' ? normalizeImageState(backDesign.sharedImage) : normalizeImageState(s.backImage);
+        if (!imgSt.src) imgSt = normalizeImageState(s.image);
+        var imgHtml;
+        if (imgSt.src) {
+            var imgSize = (imgSt.coverPercent || 100) * (imgSt.zoom || 100) / 100;
+            imgHtml = '<div style="width:100%;flex:1;min-height:0;position:relative;overflow:hidden;">' +
+                '<div style="position:absolute;inset:0;background-image:url(\'' + imgSt.src + '\');background-size:' + imgSize + '%;background-position:' + (imgSt.posX ?? 50) + '% ' + (imgSt.posY ?? 50) + '%;background-repeat:no-repeat;"></div></div>';
+        } else {
+            imgHtml = '<div style="width:100%;flex:1;min-height:0;background:#2b2018;"></div>';
+        }
+        var rows = [
+            ['Livello:', lvl, 'Tipo:', s.cast || '—'],
+            ['Raggio:', s.range || '—', 'Concentrazione:', s.conc ? 'Sì' : 'No'],
+            ['Durata:', dur, 'Scuola:', s.school || '—']
+        ];
+        var rowsHtml = rows.map(function (r) {
+            return '<div style="display:flex;justify-content:space-between;gap:4px;padding:3px 8px;border-top:1px solid rgba(255,255,255,.15);font-size:.6rem;line-height:1.25;">' +
+                '<span><b>' + r[0] + '</b> ' + r[1] + '</span><span style="text-align:right;"><b>' + r[2] + '</b> ' + r[3] + '</span></div>';
+        }).join('');
+        return '<div style="width:100%;height:100%;box-sizing:border-box;font-family:Georgia,serif;display:flex;flex-direction:column;background:#f2ede1;color:#2b2018;">' +
+            imgHtml +
+            '<div style="background:#3a2a24;color:#f2ede1;text-align:center;font-weight:bold;font-size:.72rem;padding:5px;text-transform:uppercase;letter-spacing:.03em;flex-shrink:0;">' + (s.nameIta || '(nessun nome)') + '</div>' +
+            '<div style="background:#3a2a24;color:#f2ede1;flex-shrink:0;">' + rowsHtml + '</div>' +
+        '</div>';
+    }
+
+    function renderPerSpellBackPreview() {
+        var sel = document.getElementById('perSpellPreviewPicker');
+        var layer = document.getElementById('perSpellPreviewLayer');
+        if (!sel || !layer) return;
+        var s = spells.find(function (x) { return String(x.id) === String(sel.value); });
+        layer.innerHTML = s
+            ? buildBackCardPreviewHtmlForSpell(s)
+            : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:.7rem;color:#888;text-align:center;padding:10px;">Nessun incantesimo nel grimorio da mostrare in anteprima.</div>';
+    }
 
     function switchFace(face) {
         faceMode = face;
@@ -1899,7 +2334,12 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
     }
 
     function saveCardStyle() {
-        backDesign = { mode: backMode, image: backImgState, pattern: backDesign.pattern };
+        backDesign = {
+            mode: backMode, image: backImgState, pattern: backDesign.pattern,
+            perSpell: document.getElementById('perSpellBackToggle').checked,
+            imageSource: backDesign.imageSource || 'perSpell',
+            sharedImage: Object.assign({}, sharedBackImgState)
+        };
         localStorage.setItem('grim_card_back', JSON.stringify(backDesign));
         localStorage.setItem('grim_front_theme', JSON.stringify(frontTheme));
         toast('Stile delle carte salvato', '🎨');
@@ -2030,6 +2470,38 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         return '<div style="width:63mm;height:88mm;box-sizing:border-box;position:relative;border:1px solid #bc9a70;border-radius:3px;overflow:hidden;page-break-inside:avoid;break-inside:avoid;' + d.style + '">' + d.inner + '</div>';
     }
 
+    // Alternate back layout: image + name + a 3-row stat table (livello/tipo azione,
+    // raggio/concentrazione, durata/scuola), used instead of the generic decorative
+    // back when backDesign.perSpell is enabled.
+    function buildBackCardHtmlForSpell(s) {
+        var lvl = s.level == 0 ? 'Trucchetto' : s.level + '°';
+        var dur = formatDuration(s);
+        var imgSt = backDesign.imageSource === 'shared' ? normalizeImageState(backDesign.sharedImage) : normalizeImageState(s.backImage);
+        if (!imgSt.src) imgSt = normalizeImageState(s.image);
+        var imgHtml;
+        if (imgSt.src) {
+            var imgSize = (imgSt.coverPercent || 100) * (imgSt.zoom || 100) / 100;
+            imgHtml = '<div style="width:100%;flex:1;min-height:0;position:relative;overflow:hidden;">' +
+                '<div style="position:absolute;inset:0;background-image:url(\'' + imgSt.src + '\');background-size:' + imgSize + '%;background-position:' + (imgSt.posX ?? 50) + '% ' + (imgSt.posY ?? 50) + '%;background-repeat:no-repeat;"></div></div>';
+        } else {
+            imgHtml = '<div style="width:100%;flex:1;min-height:0;background:#2b2018;"></div>';
+        }
+        var rows = [
+            ['Livello:', lvl, 'Tipo:', s.cast || '—'],
+            ['Raggio:', s.range || '—', 'Concentrazione:', s.conc ? 'Sì' : 'No'],
+            ['Durata:', dur, 'Scuola:', s.school || '—']
+        ];
+        var rowsHtml = rows.map(function (r) {
+            return '<div style="display:flex;justify-content:space-between;gap:4px;padding:1.5mm 3mm;border-top:1px solid rgba(255,255,255,.15);font-size:6pt;line-height:1.3;">' +
+                '<span><b>' + r[0] + '</b> ' + r[1] + '</span><span style="text-align:right;"><b>' + r[2] + '</b> ' + r[3] + '</span></div>';
+        }).join('');
+        return '<div style="width:63mm;height:88mm;box-sizing:border-box;position:relative;border:1px solid #bc9a70;border-radius:3px;overflow:hidden;background:#f2ede1;color:#2b2018;font-family:Palatino,Georgia,serif;page-break-inside:avoid;break-inside:avoid;display:flex;flex-direction:column;">' +
+            imgHtml +
+            '<div style="background:#3a2a24;color:#f2ede1;text-align:center;font-weight:bold;font-size:8pt;padding:2mm;text-transform:uppercase;letter-spacing:.03em;flex-shrink:0;">' + (s.nameIta || '') + '</div>' +
+            '<div style="background:#3a2a24;color:#f2ede1;flex-shrink:0;">' + rowsHtml + '</div>' +
+        '</div>';
+    }
+
     // A sheet flipped on its long edge mirrors LEFT-RIGHT. So if a front row only fills
     // its first 2 of 3 columns, the matching back row must fill columns 2-3 (not 1-2),
     // otherwise after the flip the backs land one column off from their fronts. Since
@@ -2048,6 +2520,26 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         }
         return html;
     }
+
+    // Same duplex-mirroring idea as buildBackPageHtml(), but here every back is
+    // DIFFERENT (it belongs to a specific spell), so a full-edge flip mirrors columns
+    // left-right too: within each row of up to 3 cards, the actual spell order must be
+    // reversed (not just shifted) so each back lands squarely behind its own front.
+    function buildBackPageHtmlPerSpell(pageSpells) {
+        var COLS = 3;
+        var html = '';
+        var i = 0;
+        while (i < pageSpells.length) {
+            var rowSpells = pageSpells.slice(i, i + COLS);
+            var spacers = COLS - rowSpells.length;
+            var reversed = rowSpells.slice().reverse();
+            for (var sp = 0; sp < spacers; sp++) html += '<div style="width:63mm;height:88mm;visibility:hidden;"></div>';
+            for (var c = 0; c < reversed.length; c++) html += buildBackCardHtmlForSpell(reversed[c]);
+            i += rowSpells.length;
+        }
+        return html;
+    }
+
 
     function printSpells() {
         var checkboxes = document.querySelectorAll('#pdfSpellList input[type=checkbox]:checked');
@@ -2078,7 +2570,7 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
             for (var c = 0; c < chunk.length; c++) frontHtml += buildFrontCardHtml(chunk[c]);
             pages.push({ html: frontHtml, isBack: false });
             if (includeBack) {
-                pages.push({ html: buildBackPageHtml(chunk.length), isBack: true });
+                pages.push({ html: backDesign.perSpell ? buildBackPageHtmlPerSpell(chunk) : buildBackPageHtml(chunk.length), isBack: true });
             }
         }
 
