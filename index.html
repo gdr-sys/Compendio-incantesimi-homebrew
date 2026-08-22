@@ -617,6 +617,16 @@ footer.footer-noemi {
     </fieldset>
 
     <fieldset>
+      <legend>Danno / Cura <span style="font-weight:normal; opacity:.6; font-size:.85em;">(opzionale, solo per il retro carta)</span></legend>
+      <p class="field-hint" style="margin-top:-4px;">Non è possibile ricavare automaticamente danno e tipo dal testo dell'effetto: compila questi campi a mano se vuoi poterli mostrare sul retro della carta.</p>
+      <div class="form-grid">
+        <div><label class="field-label">Tipo (es. Fuoco, Cura)</label><input type="text" id="dmgType" placeholder="Fuoco"></div>
+        <div><label class="field-label">Quantità base</label><input type="text" id="dmgAmount" placeholder="8d6"></div>
+        <div class="form-full"><label class="field-label">Quantità ai livelli superiori</label><input type="text" id="dmgHigherAmount" placeholder="+1d6 per slot superiore"></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
       <legend>Descrizione</legend>
       <label class="field-label">Effetto</label>
       <textarea id="effectDesc" rows="5" placeholder="Descrizione dell'effetto..."></textarea>
@@ -786,7 +796,7 @@ footer.footer-noemi {
 
         <div>
           <div class="back-toggle-box" style="margin:0 0 16px;">
-            <p><b>Retro con dati dell'incantesimo</b><br>Invece del retro decorativo uguale per tutto il mazzo, ogni carta avrà sul retro l'immagine, il nome e una tabellina con livello, tipo di azione, raggio, concentrazione, durata e scuola.</p>
+            <p><b>Retro con dati dell'incantesimo</b><br>Invece del retro decorativo uguale per tutto il mazzo, ogni carta avrà sul retro l'immagine, il nome e una tabellina con le informazioni che scegli qui sotto (di default livello, tipo di azione, raggio, concentrazione, durata e scuola).</p>
             <label class="switch">
               <input type="checkbox" id="perSpellBackToggle" onchange="onPerSpellBackToggle()">
               <span class="switch-track"></span>
@@ -832,6 +842,11 @@ footer.footer-noemi {
             <label class="field-label" style="margin-top:14px;">Anteprima con l'incantesimo</label>
             <select id="perSpellPreviewPicker" onchange="renderPerSpellBackPreview()"></select>
             <p class="field-hint">Solo per l'anteprima qui accanto: nome e tabellina restano sempre quelli della singola carta.</p>
+
+            <label class="field-label" style="margin-top:16px; display:block;">Campi da mostrare nella tabellina del retro</label>
+            <p class="field-hint" style="margin-top:-2px;">Scegli tu quali informazioni stampare. Le spuntate di default sono quelle già presenti prima; puoi aggiungerne altre o toglierle. L'anteprima qui accanto si aggiorna subito.</p>
+            <div class="chip-row" id="backFieldsGrid" style="margin-bottom:6px;"></div>
+            <p class="field-hint">"Danno/Cura" e "Liv. Sup." (danno) compaiono solo se hai compilato i campi "Tipo" e "Quantità" nella scheda dell'incantesimo (sezione "Danno / Cura"); altrimenti la carta li salta in automatico, anche se sono spuntati qui.</p>
           </div>
           <div id="genericBackDesignerWrap">
           <div class="mode-tabs">
@@ -1002,6 +1017,10 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
 
     // Card back design state
     const DEFAULT_PATTERN = { colorA: '#6B4FA0', colorB: '#2C1D4A', patternType: 'none', decoColor: 'light', showIcon: true, icon: '✦', showText: false, text: '', ornateBorder: true };
+    // Which stat fields appear on the per-spell card back, and in what order.
+    // Defaults match the original fixed 3-row table so existing decks look unchanged
+    // until the user opts into showing more (or fewer) fields.
+    const DEFAULT_BACK_FIELDS = { level: true, castType: true, range: true, conc: true, duration: true, school: true, ritual: false, comp: false, mats: false, classes: false, damage: false, damageHigher: false };
     let backDesign = JSON.parse(localStorage.getItem('grim_card_back')) || { mode: 'pattern', image: null, pattern: DEFAULT_PATTERN, perSpell: false };
     if (!backDesign.pattern) backDesign.pattern = Object.assign({}, DEFAULT_PATTERN);
     if (backDesign.pattern.decoColor === undefined) backDesign.pattern.decoColor = 'light';
@@ -1009,6 +1028,40 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
     if (backDesign.perSpell === undefined) backDesign.perSpell = false;
     if (backDesign.imageSource === undefined) backDesign.imageSource = 'perSpell';
     if (!backDesign.sharedImage) backDesign.sharedImage = { src: '', naturalW: 0, naturalH: 0, coverPercent: 100, zoom: 100, posX: 50, posY: 50 };
+    if (!backDesign.backFields) backDesign.backFields = Object.assign({}, DEFAULT_BACK_FIELDS);
+    else backDesign.backFields = Object.assign({}, DEFAULT_BACK_FIELDS, backDesign.backFields);
+
+    // Ordered catalog of every stat that CAN appear on the per-spell back. Each entry
+    // knows its own checkbox id, its label on the card, and how to read/format the
+    // value from a spell. get() may return '' to mean "nothing to show" -- those
+    // fields are silently skipped even if enabled, so an empty custom field (e.g. no
+    // damage info filled in) doesn't leave a blank "Danno: " row on the card.
+    const BACK_FIELD_DEFS = [
+        { key: 'level', label: 'Livello:', get: function (s) { return s.level == 0 ? 'Trucchetto' : s.level + '°'; } },
+        { key: 'castType', label: 'Tipo:', get: function (s) { return s.cast || '—'; } },
+        { key: 'range', label: 'Raggio:', get: function (s) { return s.range || '—'; } },
+        { key: 'conc', label: 'Concentr.:', get: function (s) { return s.conc ? 'Sì' : 'No'; } },
+        { key: 'duration', label: 'Durata:', get: function (s) { return formatDuration(s); } },
+        { key: 'school', label: 'Scuola:', get: function (s) { return s.school || '—'; } },
+        { key: 'ritual', label: 'Rituale:', get: function (s) { return s.ritual ? 'Sì' : 'No'; } },
+        { key: 'comp', label: 'Comp.:', get: function (s) { var c = []; if (s.comp && s.comp.v) c.push('V'); if (s.comp && s.comp.s) c.push('S'); if (s.comp && s.comp.m) c.push('M'); return c.join(', ') || '—'; } },
+        { key: 'mats', label: 'Materiali:', get: function (s) { return (s.comp && s.comp.m && s.mats) ? s.mats : ''; } },
+        { key: 'classes', label: 'Classi:', get: function (s) { return (s.classes && s.classes.length) ? s.classes.join(', ') : ''; } },
+        { key: 'damage', label: 'Danno/Cura:', get: function (s) { var t = (s.dmgType || '').trim(), a = (s.dmgAmount || '').trim(); if (!t && !a) return ''; return (a ? a + ' ' : '') + t; } },
+        { key: 'damageHigher', label: 'Liv. Sup.:', get: function (s) { return (s.dmgHigherAmount || '').trim(); } }
+    ];
+    // Builds the list of {label, value} cells to render on a spell's back, honoring
+    // backDesign.backFields and skipping any field whose get() came back empty.
+    function getBackFieldRows(s) {
+        var out = [];
+        BACK_FIELD_DEFS.forEach(function (def) {
+            if (!backDesign.backFields[def.key]) return;
+            var val = def.get(s);
+            if (!val) return;
+            out.push({ label: def.label, value: val });
+        });
+        return out;
+    }
     let backMode = backDesign.mode || 'pattern';
     let backImgState = backDesign.image || { src: '', naturalW: 0, naturalH: 0, coverPercent: 100, zoom: 100, posX: 50, posY: 50 };
     let faceMode = 'back';
@@ -1170,7 +1223,7 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
     }
     function resetFormFields() {
       document.getElementById('editId').value = '';
-      ['nameIta','nameEng','castingTime','range','duration','materialDesc','effectDesc','higherLevels'].forEach(id => document.getElementById(id).value = '');
+      ['nameIta','nameEng','castingTime','range','duration','materialDesc','effectDesc','higherLevels','dmgType','dmgAmount','dmgHigherAmount'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('edition').value = 'homebrew';
       document.getElementById('level').value = '0';
       document.getElementById('school').selectedIndex = 0;
@@ -1761,6 +1814,9 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
             classes: selClasses,
             effect: document.getElementById('effectDesc').value,
             higher: document.getElementById('higherLevels').value,
+            dmgType: document.getElementById('dmgType').value,
+            dmgAmount: document.getElementById('dmgAmount').value,
+            dmgHigherAmount: document.getElementById('dmgHigherAmount').value,
             image: currentImgState.src ? Object.assign({}, currentImgState) : '',
             backImage: currentBackImgState.src ? Object.assign({}, currentBackImgState) : ''
         };
@@ -1794,6 +1850,9 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         document.getElementById('matIn').classList.toggle('hidden', !s.comp.m);
         document.getElementById('effectDesc').value = s.effect;
         document.getElementById('higherLevels').value = s.higher || "";
+        document.getElementById('dmgType').value = s.dmgType || "";
+        document.getElementById('dmgAmount').value = s.dmgAmount || "";
+        document.getElementById('dmgHigherAmount').value = s.dmgHigherAmount || "";
         document.querySelectorAll('#createClassGrid .toggle-btn').forEach(b => {
             b.classList.toggle('selected', s.classes.includes(b.getAttribute('data-val')));
         });
@@ -1994,9 +2053,31 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
             populatePerSpellPreviewPicker();
             setBackImageSource(backDesign.imageSource || 'perSpell');
             updateSharedBackImgUI();
+            renderBackFieldsGrid();
         }
     }
     function closeBackModal() { document.getElementById('backModal').classList.remove('open'); }
+
+    // Human-readable labels for the back-fields checkbox picker (BACK_FIELD_DEFS
+    // labels are the compact ones printed on the card itself, e.g. "Comp.:").
+    const BACK_FIELD_PICKER_LABELS = {
+        level: 'Livello', castType: 'Tipo azione', range: 'Raggio', conc: 'Concentrazione',
+        duration: 'Durata', school: 'Scuola', ritual: 'Rituale', comp: 'Componenti (V/S/M)',
+        mats: 'Materiali', classes: 'Classi', damage: 'Danno/Cura (base)', damageHigher: 'Danno/Cura (liv. superiori)'
+    };
+    function renderBackFieldsGrid() {
+        var grid = document.getElementById('backFieldsGrid');
+        if (!grid) return;
+        grid.innerHTML = BACK_FIELD_DEFS.map(function (def) {
+            var on = !!backDesign.backFields[def.key];
+            return '<div class="chip' + (on ? ' selected' : '') + '" data-field="' + def.key + '" onclick="toggleBackField(\'' + def.key + '\')">' + BACK_FIELD_PICKER_LABELS[def.key] + '</div>';
+        }).join('');
+    }
+    function toggleBackField(key) {
+        backDesign.backFields[key] = !backDesign.backFields[key];
+        renderBackFieldsGrid();
+        renderPerSpellBackPreview();
+    }
 
     function onPerSpellBackToggle() {
         var on = document.getElementById('perSpellBackToggle').checked;
@@ -2010,6 +2091,7 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
             populatePerSpellPreviewPicker();
             setBackImageSource(backDesign.imageSource || 'perSpell');
             updateSharedBackImgUI();
+            renderBackFieldsGrid();
         } else {
             renderCardFramePreview();
         }
@@ -2026,8 +2108,6 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
     // Screen-scaled version of buildBackCardHtmlForSpell (percentages instead of mm/pt),
     // so the preview fits the small on-screen card-frame regardless of its exact pixel size.
     function buildBackCardPreviewHtmlForSpell(s) {
-        var lvl = s.level == 0 ? 'Trucchetto' : s.level + '°';
-        var dur = formatDuration(s);
         var imgSt = backDesign.imageSource === 'shared' ? normalizeImageState(backDesign.sharedImage) : normalizeImageState(s.backImage);
         if (!imgSt.src) imgSt = normalizeImageState(s.image);
         var imgHtml;
@@ -2038,15 +2118,7 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         } else {
             imgHtml = '<div style="width:100%;flex:1;min-height:0;background:#2b2018;"></div>';
         }
-        var rows = [
-            ['Livello:', lvl, 'Tipo:', s.cast || '—'],
-            ['Raggio:', s.range || '—', 'Concentrazione:', s.conc ? 'Sì' : 'No'],
-            ['Durata:', dur, 'Scuola:', s.school || '—']
-        ];
-        var rowsHtml = rows.map(function (r) {
-            return '<div style="display:flex;justify-content:space-between;gap:4px;padding:3px 8px;border-top:1px solid rgba(255,255,255,.15);font-size:.6rem;line-height:1.25;">' +
-                '<span><b>' + escapeHtml(r[0]) + '</b> ' + escapeHtml(r[1]) + '</span><span style="text-align:right;"><b>' + escapeHtml(r[2]) + '</b> ' + escapeHtml(r[3]) + '</span></div>';
-        }).join('');
+        var rowsHtml = buildBackStatRowsHtml(s, '.6rem', '3px 8px');
         return '<div style="width:100%;height:100%;box-sizing:border-box;font-family:Georgia,serif;display:flex;flex-direction:column;background:#f2ede1;color:#2b2018;">' +
             imgHtml +
             '<div style="background:#3a2a24;color:#f2ede1;text-align:center;font-weight:bold;font-size:.72rem;padding:5px;text-transform:uppercase;letter-spacing:.03em;flex-shrink:0;">' + escapeHtml(s.nameIta || '(nessun nome)') + '</div>' +
@@ -2359,7 +2431,8 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
             mode: backMode, image: backImgState, pattern: backDesign.pattern,
             perSpell: document.getElementById('perSpellBackToggle').checked,
             imageSource: backDesign.imageSource || 'perSpell',
-            sharedImage: Object.assign({}, sharedBackImgState)
+            sharedImage: Object.assign({}, sharedBackImgState),
+            backFields: Object.assign({}, backDesign.backFields)
         };
         localStorage.setItem('grim_card_back', JSON.stringify(backDesign));
         localStorage.setItem('grim_front_theme', JSON.stringify(frontTheme));
@@ -2483,20 +2556,37 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         cardInner += '<div style="font-size:6pt;line-height:1.45;overflow:hidden;flex:1;">' + escapeHtmlMultiline(s.effect || '') + '</div>';
         if (s.higher) cardInner += '<div style="font-size:5.5pt;font-style:italic;opacity:.82;margin-top:3px;border-top:1px solid ' + t.headerBg + ';padding-top:2px;"><b>Liv. Sup.:</b> ' + escapeHtmlMultiline(s.higher) + '</div>';
 
-        return '<div style="width:63mm;height:88mm;box-sizing:border-box;padding:6px 6px 6px 9px;background:' + t.bg + ';color:' + t.text + ';border:1px solid ' + t.headerBg + ';border-left:6px solid ' + spineColor + ';border-radius:3px;font-family:Palatino,Georgia,serif;overflow:hidden;display:flex;flex-direction:column;page-break-inside:avoid;break-inside:avoid;">' + cardInner + '</div>';
+        return '<div style="width:63mm;height:88mm;box-sizing:border-box;padding:6px 6px 6px 9px;background:' + t.bg + ';color:' + t.text + ';border:0.5mm solid ' + t.headerBg + ';border-left:6px solid ' + spineColor + ';border-radius:3px;font-family:Palatino,Georgia,serif;overflow:hidden;display:flex;flex-direction:column;page-break-inside:avoid;break-inside:avoid;">' + cardInner + '</div>';
     }
 
     function buildBackCardHtml() {
         var d = getBackDesignFragmentStyle();
-        return '<div style="width:63mm;height:88mm;box-sizing:border-box;position:relative;border:1px solid #bc9a70;border-radius:3px;overflow:hidden;page-break-inside:avoid;break-inside:avoid;' + d.style + '">' + d.inner + '</div>';
+        return '<div style="width:63mm;height:88mm;box-sizing:border-box;position:relative;border:0.5mm solid #bc9a70;border-radius:3px;overflow:hidden;page-break-inside:avoid;break-inside:avoid;' + d.style + '">' + d.inner + '</div>';
     }
 
     // Alternate back layout: image + name + a 3-row stat table (livello/tipo azione,
     // raggio/concentrazione, durata/scuola), used instead of the generic decorative
     // back when backDesign.perSpell is enabled.
+    // Turns the enabled back-fields into the small 2-per-row stat table shown under the
+    // name on a per-spell card back. Shared by the print output and the on-screen
+    // preview so the two always match exactly (only the font sizing differs, since the
+    // preview is CSS-scaled to a smaller on-screen frame instead of real mm).
+    function buildBackStatRowsHtml(s, fontSize, padding) {
+        var cells = getBackFieldRows(s);
+        var rowsHtml = '';
+        for (var i = 0; i < cells.length; i += 2) {
+            var left = cells[i], right = cells[i + 1];
+            rowsHtml += '<div style="display:flex;justify-content:space-between;gap:4px;padding:' + padding + ';border-top:1px solid rgba(255,255,255,.15);font-size:' + fontSize + ';line-height:1.3;">' +
+                '<span><b>' + escapeHtml(left.label) + '</b> ' + escapeHtml(left.value) + '</span>' +
+                '<span style="text-align:right;">' + (right ? '<b>' + escapeHtml(right.label) + '</b> ' + escapeHtml(right.value) : '') + '</span></div>';
+        }
+        if (!cells.length) {
+            rowsHtml = '<div style="padding:' + padding + ';border-top:1px solid rgba(255,255,255,.15);font-size:' + fontSize + ';opacity:.6;font-style:italic;">Nessun campo selezionato</div>';
+        }
+        return rowsHtml;
+    }
+
     function buildBackCardHtmlForSpell(s) {
-        var lvl = s.level == 0 ? 'Trucchetto' : s.level + '°';
-        var dur = formatDuration(s);
         var imgSt = backDesign.imageSource === 'shared' ? normalizeImageState(backDesign.sharedImage) : normalizeImageState(s.backImage);
         if (!imgSt.src) imgSt = normalizeImageState(s.image);
         var imgHtml;
@@ -2507,16 +2597,8 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         } else {
             imgHtml = '<div style="width:100%;flex:1;min-height:0;background:#2b2018;"></div>';
         }
-        var rows = [
-            ['Livello:', lvl, 'Tipo:', s.cast || '—'],
-            ['Raggio:', s.range || '—', 'Concentrazione:', s.conc ? 'Sì' : 'No'],
-            ['Durata:', dur, 'Scuola:', s.school || '—']
-        ];
-        var rowsHtml = rows.map(function (r) {
-            return '<div style="display:flex;justify-content:space-between;gap:4px;padding:1.5mm 3mm;border-top:1px solid rgba(255,255,255,.15);font-size:6pt;line-height:1.3;">' +
-                '<span><b>' + escapeHtml(r[0]) + '</b> ' + escapeHtml(r[1]) + '</span><span style="text-align:right;"><b>' + escapeHtml(r[2]) + '</b> ' + escapeHtml(r[3]) + '</span></div>';
-        }).join('');
-        return '<div style="width:63mm;height:88mm;box-sizing:border-box;position:relative;border:1px solid #bc9a70;border-radius:3px;overflow:hidden;background:#f2ede1;color:#2b2018;font-family:Palatino,Georgia,serif;page-break-inside:avoid;break-inside:avoid;display:flex;flex-direction:column;">' +
+        var rowsHtml = buildBackStatRowsHtml(s, '6pt', '1.5mm 3mm');
+        return '<div style="width:63mm;height:88mm;box-sizing:border-box;position:relative;border:0.5mm solid #bc9a70;border-radius:3px;overflow:hidden;background:#f2ede1;color:#2b2018;font-family:Palatino,Georgia,serif;page-break-inside:avoid;break-inside:avoid;display:flex;flex-direction:column;">' +
             imgHtml +
             '<div style="background:#3a2a24;color:#f2ede1;text-align:center;font-weight:bold;font-size:8pt;padding:2mm;text-transform:uppercase;letter-spacing:.03em;flex-shrink:0;">' + escapeHtml(s.nameIta || '') + '</div>' +
             '<div style="background:#3a2a24;color:#f2ede1;flex-shrink:0;">' + rowsHtml + '</div>' +
@@ -2609,8 +2691,8 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
             'body{background:#eee; font-family:Palatino,serif;}',
             '.sheet-page{width:210mm; height:297mm; box-sizing:border-box; padding:7mm; display:flex; align-items:center; justify-content:center;}',
             '.sheet-page.brk{page-break-after:always; break-after:page;}',
-            '.grid{display:flex; flex-wrap:wrap; gap:3mm; width:195mm;}',
-            '@media print{ body{background:white;} *{-webkit-print-color-adjust:exact;print-color-adjust:exact;} }'
+            '.grid{display:grid; grid-template-columns:repeat(3, 63mm); grid-auto-rows:88mm; gap:3mm; width:max-content;}',
+            '@media print{ body{background:white;} *{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;} }'
         ].join('');
 
         var win = window.open('', '_blank');
