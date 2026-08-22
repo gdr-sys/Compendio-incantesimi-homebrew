@@ -967,6 +967,27 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         return Object.assign({}, base, image);
     }
     let currentImgState = normalizeImageState('');
+    // User-typed spell text (name, effect, materials, etc.) is inserted directly into
+    // the HTML of the printed cards. Without escaping, a stray "<", ">" or "&" typed by
+    // the user (e.g. "HP < 10") breaks the generated markup and can wreck the whole
+    // page layout (the 3x3 card grid collapsing to fewer columns, blank cards, etc.).
+    // Built-in SRD spells happen to avoid these characters, which is why only
+    // hand-entered homebrew spells used to trigger the problem. Every piece of
+    // user-supplied text must be run through this before being concatenated into
+    // card HTML. Line breaks typed in a textarea are converted to <br> AFTER escaping,
+    // so they render as actual line breaks instead of being stripped as raw text.
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+    function escapeHtmlMultiline(str) {
+        return escapeHtml(str).replace(/\r\n|\r|\n/g, '<br>');
+    }
     // Manual correction (mm) for printers whose duplex mechanism doesn't feed the
     // second pass at exactly the same position as the first -- a hardware quirk we
     // can't detect automatically, so the user measures it once and we remember it.
@@ -1851,7 +1872,7 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         const pinned = spells.filter(s => pinnedIds.includes(String(s.id)));
         document.getElementById('pinPanel').classList.toggle('hidden', pinned.length === 0);
         document.getElementById('pinnedContainer').innerHTML = pinned.map(s => `
-            <span class="pin-tag" onclick="focusSpell('${s.id}')">${s.nameIta}</span>
+            <span class="pin-tag" onclick="focusSpell('${s.id}')">${escapeHtml(s.nameIta)}</span>
         `).join('');
 
         const filtered = spells.filter(s => {
@@ -1877,8 +1898,8 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
                     <div class="spell-body">
                         <div class="spell-head">
                             <div>
-                                <div class="spell-title">${s.nameIta}</div>
-                                ${s.nameEng ? `<div class="spell-title-eng">${s.nameEng}</div>` : ''}
+                                <div class="spell-title">${escapeHtml(s.nameIta)}</div>
+                                ${s.nameEng ? `<div class="spell-title-eng">${escapeHtml(s.nameEng)}</div>` : ''}
                             </div>
                             <button class="btn-pin ${isPinned ? 'active' : ''}" title="Memorizza">${isPinned ? '📌' : '📍'}</button>
                         </div>
@@ -1888,13 +1909,13 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
                             ${s.ritual ? '<span class="badge" style="background:var(--bg-soft); color:var(--ink-muted);">Rituale</span>' : ''}
                         </div>
                         <div class="spell-meta">
-                            <b>${s.school}</b><br>
-                            <b>Lancio:</b> ${s.cast} &nbsp;|&nbsp; <b>Durata:</b> ${formatDuration(s)}<br>
-                            <b>Componenti:</b> ${comps}
-                            ${s.comp.m && s.mats ? `<br><i>(${s.mats})</i>` : ''}
+                            <b>${escapeHtml(s.school)}</b><br>
+                            <b>Lancio:</b> ${escapeHtml(s.cast)} &nbsp;|&nbsp; <b>Durata:</b> ${escapeHtml(formatDuration(s))}<br>
+                            <b>Componenti:</b> ${escapeHtml(comps)}
+                            ${s.comp.m && s.mats ? `<br><i>(${escapeHtml(s.mats)})</i>` : ''}
                         </div>
-                        <p class="spell-effect">${s.effect}</p>
-                        ${s.higher ? `<p class="spell-higher"><b>Livelli Superiori:</b> ${s.higher}</p>` : ''}
+                        <p class="spell-effect">${escapeHtmlMultiline(s.effect)}</p>
+                        ${s.higher ? `<p class="spell-higher"><b>Livelli Superiori:</b> ${escapeHtmlMultiline(s.higher)}</p>` : ''}
                         <div class="spell-actions">
                             <button class="btn btn-ghost btn-sm btn-edit" style="flex:1;">✏️ Modifica</button>
                             <button class="btn btn-danger btn-sm btn-delete" style="flex:1;">🗑️ Elimina</button>
@@ -1998,7 +2019,7 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         var sel = document.getElementById('perSpellPreviewPicker');
         if (!sel) return;
         sel.innerHTML = spells.length
-            ? spells.map(function (s) { return '<option value="' + s.id + '">' + (s.nameIta || '(senza nome)') + '</option>'; }).join('')
+            ? spells.map(function (s) { return '<option value="' + s.id + '">' + escapeHtml(s.nameIta || '(senza nome)') + '</option>'; }).join('')
             : '<option value="">Nessun incantesimo nel grimorio</option>';
     }
 
@@ -2024,11 +2045,11 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         ];
         var rowsHtml = rows.map(function (r) {
             return '<div style="display:flex;justify-content:space-between;gap:4px;padding:3px 8px;border-top:1px solid rgba(255,255,255,.15);font-size:.6rem;line-height:1.25;">' +
-                '<span><b>' + r[0] + '</b> ' + r[1] + '</span><span style="text-align:right;"><b>' + r[2] + '</b> ' + r[3] + '</span></div>';
+                '<span><b>' + escapeHtml(r[0]) + '</b> ' + escapeHtml(r[1]) + '</span><span style="text-align:right;"><b>' + escapeHtml(r[2]) + '</b> ' + escapeHtml(r[3]) + '</span></div>';
         }).join('');
         return '<div style="width:100%;height:100%;box-sizing:border-box;font-family:Georgia,serif;display:flex;flex-direction:column;background:#f2ede1;color:#2b2018;">' +
             imgHtml +
-            '<div style="background:#3a2a24;color:#f2ede1;text-align:center;font-weight:bold;font-size:.72rem;padding:5px;text-transform:uppercase;letter-spacing:.03em;flex-shrink:0;">' + (s.nameIta || '(nessun nome)') + '</div>' +
+            '<div style="background:#3a2a24;color:#f2ede1;text-align:center;font-weight:bold;font-size:.72rem;padding:5px;text-transform:uppercase;letter-spacing:.03em;flex-shrink:0;">' + escapeHtml(s.nameIta || '(nessun nome)') + '</div>' +
             '<div style="background:#3a2a24;color:#f2ede1;flex-shrink:0;">' + rowsHtml + '</div>' +
         '</div>';
     }
@@ -2381,9 +2402,9 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
                 html += '<div class="pdf-spell-item">' +
                     '<input type="checkbox" id="pdfchk-' + s.id + '" value="' + s.id + '" onchange="updatePdfCount()">' +
                     '<label for="pdfchk-' + s.id + '">' +
-                    '<b>' + s.nameIta + '</b>' +
-                    (s.nameEng ? ' <span style="opacity:.55; font-size:.85em;">— ' + s.nameEng + '</span>' : '') +
-                    ' <span style="opacity:.45; font-size:.8em; margin-left:4px;">' + lvl + ' · ' + s.school + '</span>' +
+                    '<b>' + escapeHtml(s.nameIta) + '</b>' +
+                    (s.nameEng ? ' <span style="opacity:.55; font-size:.85em;">— ' + escapeHtml(s.nameEng) + '</span>' : '') +
+                    ' <span style="opacity:.45; font-size:.8em; margin-left:4px;">' + escapeHtml(lvl) + ' · ' + escapeHtml(s.school) + '</span>' +
                     '</label></div>';
             }
             list.innerHTML = html;
@@ -2445,22 +2466,22 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
                 '<div style="position:absolute;inset:0;background-image:url(\'' + imgSt.src + '\');background-size:' + imgSize + '%;background-position:' + (imgSt.posX ?? 50) + '% ' + (imgSt.posY ?? 50) + '%;background-repeat:no-repeat;"></div></div>';
         }
         cardInner += '<div style="background:' + t.headerBg + ';margin:-6px -6px 5px -9px;padding:5px 7px 5px 10px;border-radius:1px 2px 0 0;">';
-        cardInner += '<span style="color:' + t.headerText + ';font-weight:bold;font-size:7.5pt;line-height:1.2;">' + s.nameIta + '</span>';
+        cardInner += '<span style="color:' + t.headerText + ';font-weight:bold;font-size:7.5pt;line-height:1.2;">' + escapeHtml(s.nameIta) + '</span>';
         cardInner += '<span style="display:inline-block;margin-left:4px;background:' + levelColor(s.level) + ';color:white;font-size:5.5pt;padding:1px 4px;border-radius:3px;vertical-align:middle;font-weight:bold;">' + (s.level == 0 ? 'T' : s.level) + '</span>';
         cardInner += '<span style="display:inline-block;margin-left:3px;background:' + badgeColor + ';color:white;font-size:5.5pt;padding:1px 3px;border-radius:3px;vertical-align:middle;">' + badgeLabel + '</span>';
         cardInner += '</div>';
-        if (s.nameEng) cardInner += '<div style="font-style:italic;font-size:6pt;opacity:.65;margin-bottom:3px;">' + s.nameEng + '</div>';
+        if (s.nameEng) cardInner += '<div style="font-style:italic;font-size:6pt;opacity:.65;margin-bottom:3px;">' + escapeHtml(s.nameEng) + '</div>';
         cardInner += '<div style="font-size:6pt;line-height:1.5;margin-bottom:4px;">';
-        cardInner += '<b>' + lvl + ' ' + s.school + '</b>' + (s.ritual ? ' ®' : '') + (s.conc ? ' ©' : '') + '<br>';
-        cardInner += '<b>Lancio:</b> ' + (s.cast || '—') + '<br>';
-        cardInner += '<b>Gittata:</b> ' + (s.range || '—') + ' &nbsp; <b>Durata:</b> ' + dur + '<br>';
-        cardInner += '<b>Comp.:</b> ' + compsStr;
-        if (s.comp.m && s.mats) cardInner += ' <i style="font-size:5.5pt;">(' + s.mats + ')</i>';
-        if (s.classes && s.classes.length) cardInner += '<br><b>Classi:</b> ' + s.classes.join(', ');
+        cardInner += '<b>' + escapeHtml(lvl) + ' ' + escapeHtml(s.school) + '</b>' + (s.ritual ? ' ®' : '') + (s.conc ? ' ©' : '') + '<br>';
+        cardInner += '<b>Lancio:</b> ' + escapeHtml(s.cast || '—') + '<br>';
+        cardInner += '<b>Gittata:</b> ' + escapeHtml(s.range || '—') + ' &nbsp; <b>Durata:</b> ' + escapeHtml(dur) + '<br>';
+        cardInner += '<b>Comp.:</b> ' + escapeHtml(compsStr);
+        if (s.comp.m && s.mats) cardInner += ' <i style="font-size:5.5pt;">(' + escapeHtml(s.mats) + ')</i>';
+        if (s.classes && s.classes.length) cardInner += '<br><b>Classi:</b> ' + escapeHtml(s.classes.join(', '));
         cardInner += '</div>';
         cardInner += '<div style="border-top:1px solid ' + t.headerBg + ';opacity:.4;margin-bottom:4px;"></div>';
-        cardInner += '<div style="font-size:6pt;line-height:1.45;overflow:hidden;flex:1;">' + (s.effect || '') + '</div>';
-        if (s.higher) cardInner += '<div style="font-size:5.5pt;font-style:italic;opacity:.82;margin-top:3px;border-top:1px solid ' + t.headerBg + ';padding-top:2px;"><b>Liv. Sup.:</b> ' + s.higher + '</div>';
+        cardInner += '<div style="font-size:6pt;line-height:1.45;overflow:hidden;flex:1;">' + escapeHtmlMultiline(s.effect || '') + '</div>';
+        if (s.higher) cardInner += '<div style="font-size:5.5pt;font-style:italic;opacity:.82;margin-top:3px;border-top:1px solid ' + t.headerBg + ';padding-top:2px;"><b>Liv. Sup.:</b> ' + escapeHtmlMultiline(s.higher) + '</div>';
 
         return '<div style="width:63mm;height:88mm;box-sizing:border-box;padding:6px 6px 6px 9px;background:' + t.bg + ';color:' + t.text + ';border:1px solid ' + t.headerBg + ';border-left:6px solid ' + spineColor + ';border-radius:3px;font-family:Palatino,Georgia,serif;overflow:hidden;display:flex;flex-direction:column;page-break-inside:avoid;break-inside:avoid;">' + cardInner + '</div>';
     }
@@ -2493,11 +2514,11 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         ];
         var rowsHtml = rows.map(function (r) {
             return '<div style="display:flex;justify-content:space-between;gap:4px;padding:1.5mm 3mm;border-top:1px solid rgba(255,255,255,.15);font-size:6pt;line-height:1.3;">' +
-                '<span><b>' + r[0] + '</b> ' + r[1] + '</span><span style="text-align:right;"><b>' + r[2] + '</b> ' + r[3] + '</span></div>';
+                '<span><b>' + escapeHtml(r[0]) + '</b> ' + escapeHtml(r[1]) + '</span><span style="text-align:right;"><b>' + escapeHtml(r[2]) + '</b> ' + escapeHtml(r[3]) + '</span></div>';
         }).join('');
         return '<div style="width:63mm;height:88mm;box-sizing:border-box;position:relative;border:1px solid #bc9a70;border-radius:3px;overflow:hidden;background:#f2ede1;color:#2b2018;font-family:Palatino,Georgia,serif;page-break-inside:avoid;break-inside:avoid;display:flex;flex-direction:column;">' +
             imgHtml +
-            '<div style="background:#3a2a24;color:#f2ede1;text-align:center;font-weight:bold;font-size:8pt;padding:2mm;text-transform:uppercase;letter-spacing:.03em;flex-shrink:0;">' + (s.nameIta || '') + '</div>' +
+            '<div style="background:#3a2a24;color:#f2ede1;text-align:center;font-weight:bold;font-size:8pt;padding:2mm;text-transform:uppercase;letter-spacing:.03em;flex-shrink:0;">' + escapeHtml(s.nameIta || '') + '</div>' +
             '<div style="background:#3a2a24;color:#f2ede1;flex-shrink:0;">' + rowsHtml + '</div>' +
         '</div>';
     }
