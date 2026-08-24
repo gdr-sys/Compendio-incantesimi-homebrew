@@ -153,6 +153,7 @@ button { font-family: var(--font-ui); }
 }
 #searchBar:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 20%, transparent); }
 
+.search-toolbar-row { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; }
 .filter-toggle-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .filter-toggle {
   font-family: var(--font-ui); font-size: .82rem; font-weight: 600; color: var(--ink-muted);
@@ -160,6 +161,7 @@ button { font-family: var(--font-ui); }
   cursor: pointer; display: flex; align-items: center; gap: 6px;
 }
 .filter-toggle:hover { color: var(--gold-ink); border-color: var(--gold); }
+.filter-toggle.has-active { border-style: solid; border-color: var(--gold); color: var(--gold-ink); background: color-mix(in srgb, var(--gold) 10%, transparent); }
 .filter-toggle svg { transition: transform .25s var(--ease); }
 .filter-toggle.open svg { transform: rotate(180deg); }
 .active-count { background: var(--gold); color: var(--gold-ink); border-radius: 999px; font-size: .7rem; padding: 1px 7px; }
@@ -207,6 +209,9 @@ button { font-family: var(--font-ui); }
 }
 .spell-card:hover { transform: translateY(-4px); box-shadow: 0 14px 28px rgba(var(--shadow-color),.18); border-color: var(--border); }
 .spell-card.highlight { animation: pulseGlow 1.8s var(--ease); border-color: var(--gold); }
+.spell-card.bulk-mode { cursor: pointer; }
+.spell-card.bulk-selected { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
+#bulkModeBtn.active-toggle { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
 @keyframes pulseGlow {
   0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 55%, transparent); }
   40% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--gold) 0%, transparent); }
@@ -462,6 +467,38 @@ footer.footer-noemi {
   .topbar { padding: 14px 16px; }
   .app-shell { padding: 0 14px 90px; }
   .brand h1 { font-size: 1.1rem; }
+
+  /* Search bar gets its own full-width row instead of fighting the
+     "Sfoglia tutti" / "Seleziona" buttons for space, which was cutting off
+     the placeholder text on narrow phones. */
+  .search-toolbar-row { flex-direction: column; }
+  .search-toolbar-row > div:first-child { min-width: 0; width: 100%; }
+  .search-toolbar-row .btn { flex: 1; justify-content: center; }
+  #searchBar { font-size: .95rem; }
+
+  .topbar-actions { gap: 6px; }
+  .topbar-actions .btn { padding: 9px 14px; font-size: .82rem; }
+
+  .modal { padding: 18px; max-height: 92vh; }
+  .modal h2 { font-size: 1.2rem; }
+  .drawer { padding: 18px 18px 100px; }
+
+  /* Three buttons (Modifica/Duplica/Elimina) side by side get too cramped on
+     a phone; let them wrap onto two lines with the third centered below
+     rather than shrinking their labels unreadably. */
+  .spell-actions { flex-wrap: wrap; }
+  .spell-actions .btn { min-width: 100px; }
+
+  #bulkToolbar { flex-direction: column; align-items: stretch; }
+  #bulkToolbar > * { width: 100%; }
+  #bulkToolbar span { width: auto; }
+
+  .pdf-sel-links, .chip-row { justify-content: flex-start; }
+}
+
+@media (max-width: 400px) {
+  #searchBar { font-size: .88rem; padding-left: 40px; }
+  .search-wrap svg { left: 14px; }
 }
 
 @media print { body * { visibility: hidden; } }
@@ -478,23 +515,39 @@ footer.footer-noemi {
       </div>
     </div>
     <div class="topbar-actions">
-      <button class="icon-btn" onclick="toggleTheme()" title="Cambia tema chiaro/scuro">🌓</button>
+      <button class="icon-btn" onclick="toggleTheme()" title="Cambia tema chiaro/scuro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
       <button class="icon-btn" onclick="exportData()" title="Esporta il grimorio (JSON)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12"/><path d="M6 12l6 6 6-6"/><path d="M5 21h14"/></svg></button>
       <button class="icon-btn" onclick="document.getElementById('importFile').click()" title="Importa un grimorio (JSON)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V8"/><path d="M6 12l6-6 6 6"/><path d="M5 21h14"/></svg></button>
       <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
-      <button class="icon-btn" onclick="if(confirm('Cancellare TUTTI gli incantesimi salvati? L\'azione non è reversibile.')) resetCompendio()" title="Reset totale">🗑️</button>
-      <button class="btn btn-violet" onclick="openBackModal()">🎨 Stile carte</button>
-      <button class="btn btn-primary" onclick="openPdfModal()">🖨️ Stampa carte</button>
+      <button class="icon-btn" onclick="if(confirm('Cancellare TUTTI gli incantesimi salvati? L\'azione non è reversibile.')) resetCompendio()" title="Reset totale"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+      <button class="btn btn-violet" onclick="openBackModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:4px;"><path d="M12 22a10 10 0 1 1 10-10c0 2-1 3-3 3h-2.5a1.5 1.5 0 0 0-1 2.6c.6.6.9 1.3.5 2A2 2 0 0 1 12 22Z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="10.5" r="1"/></svg>Stile carte</button>
+      <button class="btn btn-primary" onclick="openPdfModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:4px;"><path d="M6 9V2h12v7"/><rect x="6" y="14" width="12" height="8"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg>Stampa carte</button>
     </div>
   </header>
 
   <section class="toolbar">
-    <div class="search-wrap" style="display:flex; gap:10px; align-items:stretch; flex-wrap:wrap;">
+    <div class="search-wrap search-toolbar-row">
       <div style="position:relative; flex:1; min-width:220px;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); opacity:.5; pointer-events:none;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input id="searchBar" placeholder="Cerca un incantesimo per nome..." onkeyup="render()" style="width:100%;">
+        <input id="searchBar" placeholder="Cerca per nome o effetto..." onkeyup="render()" style="width:100%;">
       </div>
-      <button class="btn btn-ghost" onclick="openSrdModal()" style="white-space:nowrap;">📖 Sfoglia tutti</button>
+      <button class="btn btn-ghost" onclick="openSrdModal()" style="white-space:nowrap;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:4px;"><path d="M2 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H2Z"/><path d="M22 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6Z"/></svg>Sfoglia tutti</button>
+      <button class="btn btn-ghost" id="bulkModeBtn" onclick="toggleBulkMode()" style="white-space:nowrap;" title="Seleziona più incantesimi per azioni di gruppo (elimina, duplica, aggiungi classe)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:4px;"><path d="m3 7 2 2 3-3"/><path d="M9 7h11"/><path d="m3 15 2 2 3-3"/><path d="M9 15h11"/></svg>Seleziona più</button>
+    </div>
+    <div class="hidden" id="bulkToolbar" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:var(--bg-soft); border-radius:10px; padding:8px 12px; margin-top:8px; font-family:var(--font-ui); font-size:.85em;">
+      <span id="bulkCount">0 selezionati</span>
+      <button class="btn btn-ghost btn-sm" onclick="bulkSelectAll(true)">Tutti</button>
+      <button class="btn btn-ghost btn-sm" onclick="bulkSelectAll(false)">Nessuno</button>
+      <span style="flex:1;"></span>
+      <select id="bulkAddClassSelect" style="max-width:170px;"><option value="">+ Aggiungi classe...</option></select>
+      <button class="btn btn-ghost btn-sm" onclick="duplicateBulk()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Duplica</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteBulk()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Elimina selezionati</button>
+    </div>
+    <div class="hidden" id="activeFiltersHint" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-family:var(--font-ui); font-size:.8rem; color:var(--ink-muted);">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      <span>Ricerca e lista filtrate da:</span>
+      <div id="activeFiltersChips" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+      <button class="btn btn-ghost btn-sm" onclick="clearAllFilters()" style="margin-left:auto;">Azzera filtri</button>
     </div>
     <div class="filter-toggle-row">
       <button class="filter-toggle" id="filterToggleBtn" onclick="toggleFilterPanel()">
@@ -507,9 +560,9 @@ footer.footer-noemi {
         <div>
           <span class="filter-group-label">Edizione</span>
           <div class="chip-row" id="filterEditionGrid">
-            <div class="chip" data-val="homebrew" onclick="handleFilterClick(this,'editions')">🏠 Homebrew</div>
-            <div class="chip" data-val="2014" onclick="handleFilterClick(this,'editions')">📜 2014</div>
-            <div class="chip" data-val="2024" onclick="handleFilterClick(this,'editions')">📗 2024</div>
+            <div class="chip" data-val="homebrew" onclick="handleFilterClick(this,'editions')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M9 22V12h6v10"/></svg>Homebrew</div>
+            <div class="chip" data-val="2014" onclick="handleFilterClick(this,'editions')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M8 21h8a2 2 0 0 0 2-2v-3H6v3a2 2 0 0 0 2 2Z"/><path d="M19 17V8a3 3 0 0 0-6 0"/><path d="M5 17V8a3 3 0 0 1 6 0v9"/></svg>2014</div>
+            <div class="chip" data-val="2024" onclick="handleFilterClick(this,'editions')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>2024</div>
           </div>
         </div>
         <div>
@@ -527,7 +580,7 @@ footer.footer-noemi {
   </section>
 
   <div class="pin-panel hidden" id="pinPanel">
-    <span class="pin-label">📌 Memorizzati</span>
+    <span class="pin-label"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Memorizzati</span>
     <div id="pinnedContainer" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
   </div>
 
@@ -548,7 +601,7 @@ footer.footer-noemi {
 <div class="drawer-overlay" id="formOverlay" onclick="if(event.target===this) closeFormDrawer()">
   <aside class="drawer">
     <div class="field-row">
-      <h2 id="formTitle">📜 Nuovo Incantesimo</h2>
+      <h2 id="formTitle"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M8 21h8a2 2 0 0 0 2-2v-3H6v3a2 2 0 0 0 2 2Z"/><path d="M19 17V8a3 3 0 0 0-6 0"/><path d="M5 17V8a3 3 0 0 1 6 0v9"/></svg>Nuovo Incantesimo</h2>
       <button class="close-x" onclick="closeFormDrawer()">✕</button>
     </div>
 
@@ -647,19 +700,19 @@ footer.footer-noemi {
         </div>
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:8px;">
           <span class="res-badge hidden" id="frontImgResBadge"></span>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="resetFrontImgPosition()">↺ Centra e adatta</button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="resetFrontImgPosition()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Centra e adatta</button>
         </div>
         <div class="zoom-row" style="margin-top:8px;">
-          <span style="font-family:var(--font-ui); font-size:.78rem;">🔍−</span>
+          <span style="font-family:var(--font-ui); font-size:.78rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><line x1="8" y1="11" x2="14" y2="11"/></svg></span>
           <input type="range" id="frontImgZoom" min="100" max="400" value="100" oninput="updateFrontImgZoom(this.value)">
-          <span style="font-family:var(--font-ui); font-size:.78rem;">🔍+</span>
+          <span style="font-family:var(--font-ui); font-size:.78rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></span>
         </div>
         <p class="field-hint">Trascina l'immagine per riposizionarla — questa anteprima corrisponde esattamente a come verrà ritagliata in stampa.</p>
         <button type="button" class="btn btn-danger btn-sm" onclick="removeImg()">✕ Rimuovi immagine</button>
       </div>
 
       <div id="frontImgUploadWrap">
-        <label class="img-drop" for="imgInput">📷 Carica da file</label>
+        <label class="img-drop" for="imgInput"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:4px;"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 21h14"/></svg>Carica da file</label>
         <input type="file" id="imgInput" accept="image/*" class="hidden" onchange="handleImg(event)">
         <div style="margin:10px 0; text-align:center; font-family:var(--font-ui); font-size:.78rem; color:var(--ink-muted);">— oppure —</div>
         <label class="field-label">Incolla URL immagine</label>
@@ -667,7 +720,7 @@ footer.footer-noemi {
           <input type="text" id="imgUrlInput" placeholder="https://...">
           <button type="button" class="btn btn-ghost btn-sm" onclick="handleImgUrl()">Carica</button>
         </div>
-        <p class="field-hint">📐 Dimensioni minime consigliate: 750 × 160 px (equivalenti a 300 DPI sulla fascia immagine della carta), così resta nitida anche con lo zoom applicato.</p>
+        <p class="field-hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M3 17 17 3l4 4L7 21z"/><path d="m14 6 3 3"/><path d="m11 9 3 3"/><path d="m8 12 3 3"/><path d="m5 15 3 3"/></svg>Dimensioni minime consigliate: 750 × 160 px (equivalenti a 300 DPI sulla fascia immagine della carta), così resta nitida anche con lo zoom applicato.</p>
       </div>
     </fieldset>
 
@@ -681,19 +734,19 @@ footer.footer-noemi {
         </div>
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:8px;">
           <span class="res-badge hidden" id="backSpellImgResBadge"></span>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="resetBackSpellImgPosition()">↺ Centra e adatta</button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="resetBackSpellImgPosition()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Centra e adatta</button>
         </div>
         <div class="zoom-row" style="margin-top:8px;">
-          <span style="font-family:var(--font-ui); font-size:.78rem;">🔍−</span>
+          <span style="font-family:var(--font-ui); font-size:.78rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><line x1="8" y1="11" x2="14" y2="11"/></svg></span>
           <input type="range" id="backSpellImgZoom" min="100" max="400" value="100" oninput="updateBackSpellImgZoom(this.value)">
-          <span style="font-family:var(--font-ui); font-size:.78rem;">🔍+</span>
+          <span style="font-family:var(--font-ui); font-size:.78rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></span>
         </div>
         <p class="field-hint">Trascina l'immagine per riposizionarla.</p>
         <button type="button" class="btn btn-danger btn-sm" onclick="removeBackSpellImg()">✕ Rimuovi immagine</button>
       </div>
 
       <div id="backSpellImgUploadWrap">
-        <label class="img-drop" for="backSpellImgInput">📷 Carica da file</label>
+        <label class="img-drop" for="backSpellImgInput"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:4px;"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 21h14"/></svg>Carica da file</label>
         <input type="file" id="backSpellImgInput" accept="image/*" class="hidden" onchange="handleBackSpellImg(event)">
         <div style="margin:10px 0; text-align:center; font-family:var(--font-ui); font-size:.78rem; color:var(--ink-muted);">— oppure —</div>
         <label class="field-label">Incolla URL immagine</label>
@@ -701,11 +754,11 @@ footer.footer-noemi {
           <input type="text" id="backSpellImgUrlInput" placeholder="https://...">
           <button type="button" class="btn btn-ghost btn-sm" onclick="handleBackSpellImgUrl()">Carica</button>
         </div>
-        <p class="field-hint">📐 Dimensioni minime consigliate: 750 × 710 px (equivalenti a 300 DPI sulla fascia immagine del retro).</p>
+        <p class="field-hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M3 17 17 3l4 4L7 21z"/><path d="m14 6 3 3"/><path d="m11 9 3 3"/><path d="m8 12 3 3"/><path d="m5 15 3 3"/></svg>Dimensioni minime consigliate: 750 × 710 px (equivalenti a 300 DPI sulla fascia immagine del retro).</p>
       </div>
     </fieldset>
 
-    <button onclick="saveSpell()" class="btn btn-primary btn-block" id="btnSave">📜 Salva nel Grimorio</button>
+    <button onclick="saveSpell()" class="btn btn-primary btn-block" id="btnSave"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M8 21h8a2 2 0 0 0 2-2v-3H6v3a2 2 0 0 0 2 2Z"/><path d="M19 17V8a3 3 0 0 0-6 0"/><path d="M5 17V8a3 3 0 0 1 6 0v9"/></svg>Salva nel Grimorio</button>
   </aside>
 </div>
 
@@ -713,7 +766,7 @@ footer.footer-noemi {
 <!-- ============ MODAL: SFOGLIA TUTTI (SRD) ============ -->
 <div class="modal-overlay" id="srdModal" onclick="if(event.target===this) closeSrdModal()">
   <div class="modal">
-    <h2>📖 Sfoglia tutti gli incantesimi SRD</h2>
+    <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:5px;"><path d="M2 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H2Z"/><path d="M22 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6Z"/></svg>Sfoglia tutti gli incantesimi SRD</h2>
     <p class="modal-sub">Elenco completo degli incantesimi ufficiali. Usa la ricerca per nome, poi premi + per aggiungerne uno al tuo grimorio (potrai poi modificarlo liberamente).</p>
     <div class="search-wrap" style="margin-bottom:12px;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -730,13 +783,22 @@ footer.footer-noemi {
 <!-- ============ MODAL: STAMPA CARTE ============ -->
 <div class="modal-overlay" id="pdfModal" onclick="if(event.target===this) closePdfModal()">
   <div class="modal">
-    <h2>🖨️ Stampa carte incantesimo</h2>
+    <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:5px;"><path d="M6 9V2h12v7"/><rect x="6" y="14" width="12" height="8"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg>Stampa carte incantesimo</h2>
     <p class="modal-sub">Seleziona gli incantesimi da stampare. Le carte vengono generate in formato poker (63×88mm), 9 per foglio A4.</p>
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <span id="pdfSelCount" style="font-family:var(--font-ui); font-size:.82em; color:var(--ink-muted);">0 selezionati</span>
       <div class="pdf-sel-links">
         <button onclick="pdfSelectAll(true)">Tutti</button> / <button onclick="pdfSelectAll(false)">Nessuno</button>
       </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+      <label class="field-label" for="pdfSortOrder" style="margin:0; white-space:nowrap;">Ordina per</label>
+      <select id="pdfSortOrder" onchange="renderPdfSpellList()" style="flex:1;">
+        <option value="name">Nome (A-Z)</option>
+        <option value="levelAsc">Livello (crescente)</option>
+        <option value="levelDesc">Livello (decrescente)</option>
+        <option value="class">Classe (prima classe elencata)</option>
+      </select>
     </div>
     <p class="field-hint hidden" id="pdfFilterHint" style="margin-top:2px;"></p>
     <div class="pdf-spell-list" id="pdfSpellList"></div>
@@ -749,11 +811,11 @@ footer.footer-noemi {
       </label>
     </div>
     <p id="duplexHint" class="hidden" style="font-family:var(--font-ui); font-size:.76rem; color:var(--ink-muted); margin:-6px 0 4px; line-height:1.5;">
-      💡 Se la tua stampante non supporta il fronte-retro automatico: stampa tutte le pagine, poi reinserisci gli stessi fogli capovolti da sinistra a destra (come si gira una pagina di un libro) e ristampali per completare i retri.
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .8 1.7v.6h6.4v-.6c0-.7.3-1.3.8-1.7A7 7 0 0 0 12 2Z"/></svg>Se la tua stampante non supporta il fronte-retro automatico: stampa tutte le pagine, poi reinserisci gli stessi fogli capovolti da sinistra a destra (come si gira una pagina di un libro) e ristampali per completare i retri.
     </p>
 
     <div id="fineAdjustBox" class="hidden" style="background:var(--bg-soft); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px 14px; margin:10px 0;">
-      <p style="margin:0 0 8px; font-family:var(--font-ui); font-size:.8rem; color:var(--ink);"><b>⚙️ Regolazione fine retro</b><br>
+      <p style="margin:0 0 8px; font-family:var(--font-ui); font-size:.8rem; color:var(--ink);"><b><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Regolazione fine retro</b><br>
         <span style="color:var(--ink-muted); font-size:.94em;">Alcune stampanti spostano leggermente il retro rispetto al fronte durante il fronte-retro. Misura lo scarto su una stampa di prova e correggilo qui: resterà salvato per le prossime stampe. Es. se il retro esce 1,5&nbsp;mm più in basso, imposta lo scarto verticale a <b>-1.5</b>.</span>
       </p>
       <div class="two-col">
@@ -769,7 +831,7 @@ footer.footer-noemi {
     </div>
 
     <div style="display:flex; gap:10px;">
-      <button onclick="printSpells()" class="btn btn-primary" style="flex:1;">🖨️ Apri finestra di stampa</button>
+      <button onclick="printSpells()" class="btn btn-primary" style="flex:1;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:5px;"><path d="M6 9V2h12v7"/><rect x="6" y="14" width="12" height="8"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg>Apri finestra di stampa</button>
       <button onclick="closePdfModal()" class="btn btn-ghost" style="flex:1;">Annulla</button>
     </div>
   </div>
@@ -778,7 +840,7 @@ footer.footer-noemi {
 <!-- ============ MODAL: STILE DELLE CARTE ============ -->
 <div class="modal-overlay" id="backModal" onclick="if(event.target===this) closeBackModal()">
   <div class="modal" style="max-width:780px;">
-    <h2>🎨 Stile delle carte</h2>
+    <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:5px;"><path d="M12 22a10 10 0 1 1 10-10c0 2-1 3-3 3h-2.5a1.5 1.5 0 0 0-1 2.6c.6.6.9 1.3.5 2A2 2 0 0 1 12 22Z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="10.5" r="1"/></svg>Stile delle carte</h2>
     <p class="modal-sub">Personalizza fronte e retro delle carte che verranno stampate. Le impostazioni si applicano a tutto il mazzo.</p>
 
     <div class="mode-tabs">
@@ -797,7 +859,7 @@ footer.footer-noemi {
             <div id="perSpellPreviewLayer" class="hidden" style="position:absolute; inset:0; overflow:hidden;"></div>
           </div>
           <span class="res-badge hidden" id="resBadge"></span>
-          <button class="btn btn-ghost btn-sm" onclick="resetBackImagePosition()">↺ Centra e adatta</button>
+          <button class="btn btn-ghost btn-sm" onclick="resetBackImagePosition()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Centra e adatta</button>
         </div>
 
         <div>
@@ -822,18 +884,18 @@ footer.footer-noemi {
                 </div>
                 <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:8px;">
                   <span class="res-badge hidden" id="sharedBackImgResBadge"></span>
-                  <button type="button" class="btn btn-ghost btn-sm" onclick="resetSharedBackImgPosition()">↺ Centra e adatta</button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="resetSharedBackImgPosition()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Centra e adatta</button>
                 </div>
                 <div class="zoom-row" style="margin-top:8px;">
-                  <span style="font-family:var(--font-ui); font-size:.78rem;">🔍−</span>
+                  <span style="font-family:var(--font-ui); font-size:.78rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><line x1="8" y1="11" x2="14" y2="11"/></svg></span>
                   <input type="range" id="sharedBackImgZoom" min="100" max="400" value="100" oninput="updateSharedBackImgZoom(this.value)">
-                  <span style="font-family:var(--font-ui); font-size:.78rem;">🔍+</span>
+                  <span style="font-family:var(--font-ui); font-size:.78rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></span>
                 </div>
                 <p class="field-hint">Trascina l'immagine per riposizionarla — verrà usata identica su tutti i retri.</p>
                 <button type="button" class="btn btn-danger btn-sm" onclick="removeSharedBackImg()">✕ Rimuovi immagine</button>
               </div>
               <div id="sharedBackImgUploadWrap">
-                <label class="img-drop" for="sharedBackImgInput">📷 Carica da file</label>
+                <label class="img-drop" for="sharedBackImgInput"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:4px;"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 21h14"/></svg>Carica da file</label>
                 <input type="file" id="sharedBackImgInput" accept="image/*" class="hidden" onchange="handleSharedBackImg(event)">
                 <div style="margin:10px 0; text-align:center; font-family:var(--font-ui); font-size:.78rem; color:var(--ink-muted);">— oppure —</div>
                 <label class="field-label">Incolla URL immagine</label>
@@ -841,7 +903,7 @@ footer.footer-noemi {
                   <input type="text" id="sharedBackImgUrlInput" placeholder="https://...">
                   <button type="button" class="btn btn-ghost btn-sm" onclick="handleSharedBackImgUrl()">Carica</button>
                 </div>
-                <p class="field-hint">📐 Dimensioni minime consigliate: 750 × 710 px (equivalenti a 300 DPI sulla fascia immagine del retro).</p>
+                <p class="field-hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M3 17 17 3l4 4L7 21z"/><path d="m14 6 3 3"/><path d="m11 9 3 3"/><path d="m8 12 3 3"/><path d="m5 15 3 3"/></svg>Dimensioni minime consigliate: 750 × 710 px (equivalenti a 300 DPI sulla fascia immagine del retro).</p>
               </div>
             </div>
 
@@ -861,7 +923,7 @@ footer.footer-noemi {
           </div>
 
           <div id="panelImage">
-            <label class="img-drop" for="backFileInput">📁 Carica da file</label>
+            <label class="img-drop" for="backFileInput"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:4px;"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>Carica da file</label>
             <input type="file" id="backFileInput" accept="image/*" class="hidden" onchange="handleBackFile(event)">
             <div style="margin:12px 0; font-family:var(--font-ui); font-size:.78rem; color:var(--ink-muted); text-align:center;">— oppure —</div>
             <label class="field-label">Incolla URL immagine</label>
@@ -873,15 +935,15 @@ footer.footer-noemi {
             <div id="zoomControls" class="hidden" style="margin-top:16px;">
               <label class="field-label">Zoom</label>
               <div class="zoom-row">
-                <span style="font-family:var(--font-ui); font-size:.78rem;">🔍−</span>
+                <span style="font-family:var(--font-ui); font-size:.78rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><line x1="8" y1="11" x2="14" y2="11"/></svg></span>
                 <input type="range" id="zoomSlider" min="100" max="400" value="100" oninput="updateZoom(this.value)">
-                <span style="font-family:var(--font-ui); font-size:.78rem;">🔍+</span>
+                <span style="font-family:var(--font-ui); font-size:.78rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></span>
               </div>
               <p style="font-family:var(--font-ui); font-size:.76rem; color:var(--ink-muted); margin-top:6px;">Trascina l'immagine nella cornice per riposizionarla.</p>
             </div>
 
             <p style="font-family:var(--font-ui); font-size:.74rem; color:var(--ink-muted); margin-top:14px; line-height:1.5;">
-              📐 <b>Dimensioni minime consigliate:</b> 750 × 1050 px (equivalenti a 300 DPI su una carta 63×88mm), per una stampa nitida anche con zoom applicato.
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M3 17 17 3l4 4L7 21z"/><path d="m14 6 3 3"/><path d="m11 9 3 3"/><path d="m8 12 3 3"/><path d="m5 15 3 3"/></svg><b>Dimensioni minime consigliate:</b> 750 × 1050 px (equivalenti a 300 DPI su una carta 63×88mm), per una stampa nitida anche con zoom applicato.
             </p>
           </div>
 
@@ -909,8 +971,8 @@ footer.footer-noemi {
             <span class="field-label" style="margin-bottom:8px; display:block;">Decorazione (simbolo, scritta, cornice)</span>
 
             <div class="chip-row" style="margin-bottom:10px;">
-              <div class="chip" data-deco="light" onclick="setDecoColor('light')">☀️ Chiara</div>
-              <div class="chip" data-deco="dark" onclick="setDecoColor('dark')">🌑 Scura</div>
+              <div class="chip" data-deco="light" onclick="setDecoColor('light')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Chiara</div>
+              <div class="chip" data-deco="dark" onclick="setDecoColor('dark')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>Scura</div>
             </div>
 
             <div class="toggle-line">
@@ -956,13 +1018,13 @@ footer.footer-noemi {
           </div>
 
           <p style="font-family:var(--font-ui); font-size:.74rem; color:var(--ink-muted); margin-top:14px; line-height:1.5;">
-            🎴 Questo stile viene applicato alle carte generate in fase di stampa. La striscia laterale colorata resta legata alla scuola di magia per restare leggibile a colpo d'occhio.
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>Questo stile viene applicato alle carte generate in fase di stampa. La striscia laterale colorata resta legata alla scuola di magia per restare leggibile a colpo d'occhio.
           </p>
         </div>
       </div>
     </div>
 
-    <button class="btn btn-primary btn-block" style="margin-top:22px;" onclick="saveCardStyle()">💾 Salva stile delle carte</button>
+    <button class="btn btn-primary btn-block" style="margin-top:22px;" onclick="saveCardStyle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:4px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>Salva stile delle carte</button>
   </div>
 </div>
 
@@ -1227,6 +1289,37 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
       const badge = document.getElementById('activeFilterCount');
       badge.textContent = n;
       badge.classList.toggle('hidden', n === 0);
+      document.getElementById('filterToggleBtn').classList.toggle('has-active', n > 0);
+
+      const hint = document.getElementById('activeFiltersHint');
+      const chipsBox = document.getElementById('activeFiltersChips');
+      if (!hint || !chipsBox) return;
+      hint.classList.toggle('hidden', n === 0);
+      if (n === 0) { chipsBox.innerHTML = ''; return; }
+      const chips = [];
+      const editionLabels = { homebrew: 'Homebrew', '2014': 'SRD 2014', '2024': 'SRD 2024' };
+      filterState.editions.forEach(v => chips.push({ type: 'editions', val: v, label: editionLabels[v] || v }));
+      filterState.levels.forEach(v => chips.push({ type: 'levels', val: v, label: v === '0' ? 'Trucchetto' : v + '° Livello' }));
+      filterState.classes.forEach(v => chips.push({ type: 'classes', val: v, label: v }));
+      chipsBox.innerHTML = chips.map(c => `
+        <span class="chip selected" style="padding:3px 8px 3px 10px; font-size:.78rem; display:inline-flex; align-items:center; gap:5px; cursor:default;">
+          ${escapeHtml(c.label)}
+          <button onclick="removeActiveFilter('${c.type}','${String(c.val).replace(/'/g, "\\'")}')" title="Rimuovi filtro" style="background:none; border:none; cursor:pointer; color:inherit; padding:0; display:flex; opacity:.75;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </span>`).join('');
+    }
+    // Removes a single active filter (from the hint strip's chip 'x') and keeps the
+    // corresponding checkbox/chip in the filter panel in sync.
+    function removeActiveFilter(type, val) {
+      filterState[type] = filterState[type].filter(v => String(v) !== String(val));
+      syncFilterUI();
+      render();
+    }
+    function clearAllFilters() {
+      filterState = { levels: [], classes: [], editions: [] };
+      syncFilterUI();
+      render();
     }
 
     // ============================================================
@@ -1251,8 +1344,8 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
       updateFrontImgUI();
       currentBackImgState = normalizeImageState('');
       updateBackSpellImgUI();
-      document.getElementById('formTitle').textContent = '📜 Nuovo Incantesimo';
-      document.getElementById('btnSave').innerHTML = '📜 Salva nel Grimorio';
+      document.getElementById('formTitle').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:5px;"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Nuovo Incantesimo';
+      document.getElementById('btnSave').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:4px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>Salva nel Grimorio';
     }
 
     // ============================================================
@@ -1904,8 +1997,8 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         updateFrontImgUI();
         currentBackImgState = normalizeImageState(s.backImage);
         updateBackSpellImgUI();
-        document.getElementById('formTitle').textContent = '✏️ Modifica Incantesimo';
-        document.getElementById('btnSave').innerHTML = '💾 Aggiorna Incantesimo';
+        document.getElementById('formTitle').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:5px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Modifica Incantesimo';
+        document.getElementById('btnSave').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:4px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>Aggiorna Incantesimo';
         openFormDrawer();
     }
 
@@ -1916,6 +2009,23 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
             toast('Incantesimo eliminato', '🗑️');
             render();
         }
+    }
+
+    // Clones a spell with a new id and a "(copia)" suffix on the Italian name, so the
+    // user can quickly create a variant without retyping every field. Inserted right
+    // after the original in the array so it shows up next to it in the list.
+    function duplicateSpell(id) {
+        const s = spells.find(x => String(x.id) === String(id));
+        if (!s) return;
+        const copy = JSON.parse(JSON.stringify(s));
+        copy.id = 'spell_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        copy.nameIta = (copy.nameIta || '') + ' (copia)';
+        const idx = spells.findIndex(x => String(x.id) === String(id));
+        spells.splice(idx + 1, 0, copy);
+        localStorage.setItem('grim_master_v1', JSON.stringify(spells));
+        toast('Incantesimo duplicato', '📄');
+        render();
+        setTimeout(() => focusSpell(copy.id), 60);
     }
 
     function togglePin(id) {
@@ -1989,7 +2099,8 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
     function getFilteredSpells() {
         const query = document.getElementById('searchBar').value.toLowerCase();
         return spells.filter(s => {
-            const matchSearch = s.nameIta.toLowerCase().includes(query) || (s.nameEng || '').toLowerCase().includes(query);
+            const matchSearch = s.nameIta.toLowerCase().includes(query) || (s.nameEng || '').toLowerCase().includes(query)
+                || (s.effect || '').toLowerCase().includes(query) || (s.higher || '').toLowerCase().includes(query);
             const matchLevel = filterState.levels.length === 0 || filterState.levels.includes(s.level.toString());
             const matchClass = filterState.classes.length === 0 || (s.classes || []).some(c => filterState.classes.includes(c));
             const ed = s.edition || 'homebrew';
@@ -1997,6 +2108,9 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
             return matchSearch && matchLevel && matchClass && matchEdition;
         });
     }
+
+    let bulkMode = false;
+    let bulkSelectedIds = new Set();
 
     function render() {
         const list = document.getElementById('spellList');
@@ -2017,8 +2131,10 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
             const isPinned = pinnedIds.includes(String(s.id));
             const edLabel = getEditionLabel(s.edition || 'homebrew');
             const comps = [s.comp.v ? 'V' : '', s.comp.s ? 'S' : '', s.comp.m ? 'M' : ''].filter(Boolean).join(', ');
+            const isBulkChecked = bulkSelectedIds.has(String(s.id));
             return `
-                <div class="spell-card" id="spell-${s.id}" data-sid="${s.id}">
+                <div class="spell-card ${bulkMode ? 'bulk-mode' : ''} ${isBulkChecked ? 'bulk-selected' : ''}" id="spell-${s.id}" data-sid="${s.id}">
+                    ${bulkMode ? `<input type="checkbox" class="bulk-check" ${isBulkChecked ? 'checked' : ''} style="position:absolute; top:10px; left:10px; z-index:5; width:20px; height:20px;">` : ''}
                     <div class="spell-spine ${schoolSpineClass(s.school)}"></div>
                     ${s.image ? `<img src="${(typeof s.image === 'string' ? s.image : s.image.src)}" class="spell-img">` : ''}
                     <div class="spell-body">
@@ -2027,7 +2143,7 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
                                 <div class="spell-title">${escapeHtml(s.nameIta)}</div>
                                 ${s.nameEng ? `<div class="spell-title-eng">${escapeHtml(s.nameEng)}</div>` : ''}
                             </div>
-                            <button class="btn-pin ${isPinned ? 'active' : ''}" title="Memorizza">${isPinned ? '📌' : '📍'}</button>
+                            <button class="btn-pin ${isPinned ? 'active' : ''}" title="Memorizza"><svg width="16" height="16" viewBox="0 0 24 24" fill="${isPinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></button>
                         </div>
                         <div class="badge-row">
                             ${edLabel}
@@ -2043,8 +2159,9 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
                         <p class="spell-effect">${escapeHtmlMultiline(s.effect)}</p>
                         ${s.higher ? `<p class="spell-higher"><b>Livelli Superiori:</b> ${escapeHtmlMultiline(s.higher)}</p>` : ''}
                         <div class="spell-actions">
-                            <button class="btn btn-ghost btn-sm btn-edit" style="flex:1;">✏️ Modifica</button>
-                            <button class="btn btn-danger btn-sm btn-delete" style="flex:1;">🗑️ Elimina</button>
+                            <button class="btn btn-ghost btn-sm btn-edit" style="flex:1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Modifica</button>
+                            <button class="btn btn-ghost btn-sm btn-duplicate" style="flex:1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Duplica</button>
+                            <button class="btn btn-danger btn-sm btn-delete" style="flex:1;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Elimina</button>
                         </div>
                     </div>
                 </div>`;
@@ -2055,10 +2172,107 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         const card = e.target.closest('.spell-card');
         if (!card) return;
         const sid = card.getAttribute('data-sid');
+        if (bulkMode) {
+            if (e.target.classList.contains('bulk-check')) return; // its own change handler toggles it
+            toggleBulkSelected(sid);
+            return;
+        }
         if (e.target.closest('.btn-delete')) { deleteSpell(sid); return; }
         if (e.target.closest('.btn-edit')) { editSpell(sid); return; }
+        if (e.target.closest('.btn-duplicate')) { duplicateSpell(sid); return; }
         if (e.target.closest('.btn-pin')) { togglePin(sid); return; }
     });
+    document.getElementById('spellList').addEventListener('change', (e) => {
+        if (!e.target.classList.contains('bulk-check')) return;
+        const card = e.target.closest('.spell-card');
+        if (card) toggleBulkSelected(card.getAttribute('data-sid'));
+    });
+
+    // ============================================================
+    // BULK ACTIONS
+    // ============================================================
+    function toggleBulkMode() {
+        bulkMode = !bulkMode;
+        bulkSelectedIds.clear();
+        document.getElementById('bulkModeBtn').classList.toggle('active-toggle', bulkMode);
+        document.getElementById('bulkModeBtn').title = bulkMode ? '' : 'Seleziona più incantesimi per azioni di gruppo (elimina, duplica, aggiungi classe)';
+        document.getElementById('bulkModeBtn').innerHTML = bulkMode
+            ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:4px;"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>Annulla selezione'
+            : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:4px;"><path d="m3 7 2 2 3-3"/><path d="M9 7h11"/><path d="m3 15 2 2 3-3"/><path d="M9 15h11"/></svg>Seleziona più';
+        document.getElementById('bulkToolbar').classList.toggle('hidden', !bulkMode);
+        if (bulkMode) populateBulkClassSelect();
+        updateBulkCount();
+        render();
+    }
+    function toggleBulkSelected(id) {
+        const key = String(id);
+        if (bulkSelectedIds.has(key)) bulkSelectedIds.delete(key); else bulkSelectedIds.add(key);
+        updateBulkCount();
+        render();
+    }
+    function bulkSelectAll(state) {
+        const filtered = getFilteredSpells();
+        if (state) filtered.forEach(s => bulkSelectedIds.add(String(s.id)));
+        else bulkSelectedIds.clear();
+        updateBulkCount();
+        render();
+    }
+    function updateBulkCount() {
+        const el = document.getElementById('bulkCount');
+        if (el) el.textContent = bulkSelectedIds.size + ' selezionat' + (bulkSelectedIds.size === 1 ? 'o' : 'i');
+    }
+    function populateBulkClassSelect() {
+        const sel = document.getElementById('bulkAddClassSelect');
+        if (!sel) return;
+        sel.innerHTML = '<option value="">+ Aggiungi classe...</option>' + CLASSES.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+    }
+    function deleteBulk() {
+        if (bulkSelectedIds.size === 0) { toast('Nessun incantesimo selezionato', '⚠️'); return; }
+        if (!confirm('Eliminare definitivamente ' + bulkSelectedIds.size + ' incantesimi selezionati? L\'azione non è reversibile.')) return;
+        spells = spells.filter(s => !bulkSelectedIds.has(String(s.id)));
+        localStorage.setItem('grim_master_v1', JSON.stringify(spells));
+        toast(bulkSelectedIds.size + ' incantesimi eliminati', '🗑️');
+        bulkSelectedIds.clear();
+        updateBulkCount();
+        render();
+    }
+    function duplicateBulk() {
+        if (bulkSelectedIds.size === 0) { toast('Nessun incantesimo selezionato', '⚠️'); return; }
+        const idsToCopy = spells.filter(s => bulkSelectedIds.has(String(s.id)));
+        idsToCopy.forEach(s => {
+            const copy = JSON.parse(JSON.stringify(s));
+            copy.id = 'spell_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+            copy.nameIta = (copy.nameIta || '') + ' (copia)';
+            const idx = spells.findIndex(x => String(x.id) === String(s.id));
+            spells.splice(idx + 1, 0, copy);
+        });
+        localStorage.setItem('grim_master_v1', JSON.stringify(spells));
+        toast(idsToCopy.length + ' incantesimi duplicati', '📄');
+        bulkSelectedIds.clear();
+        updateBulkCount();
+        render();
+    }
+    // Tags the given class onto every selected spell (skipping spells that already
+    // have it), then resets the dropdown back to its placeholder.
+    (function () {
+        var sel = document.getElementById('bulkAddClassSelect');
+        if (sel) sel.addEventListener('change', function () {
+            var cl = sel.value;
+            if (!cl) return;
+            if (bulkSelectedIds.size === 0) { toast('Nessun incantesimo selezionato', '⚠️'); sel.value = ''; return; }
+            let count = 0;
+            spells.forEach(s => {
+                if (bulkSelectedIds.has(String(s.id))) {
+                    s.classes = s.classes || [];
+                    if (!s.classes.includes(cl)) { s.classes.push(cl); count++; }
+                }
+            });
+            localStorage.setItem('grim_master_v1', JSON.stringify(spells));
+            toast('Classe "' + cl + '" aggiunta a ' + count + ' incantesimi', '🏷️');
+            sel.value = '';
+            render();
+        });
+    })();
 
     // Init class grids
     ['createClassGrid', 'filterClassGrid'].forEach(gid => {
@@ -2539,8 +2753,35 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
     // STAMPA / PDF
     // ============================================================
     function openPdfModal() {
+        renderPdfSpellList();
+        document.getElementById('printOffsetX').value = printOffset.x;
+        document.getElementById('printOffsetY').value = printOffset.y;
+        var backOn = document.getElementById('includeBackToggle').checked;
+        document.getElementById('duplexHint').classList.toggle('hidden', !backOn);
+        document.getElementById('fineAdjustBox').classList.toggle('hidden', !backOn);
+        document.getElementById('pdfModal').classList.add('open');
+    }
+    // Re-renders the print spell list in the chosen order, preserving whatever was
+    // already checked (so switching sort order doesn't lose the current selection).
+    // The DOM order here is what printSpells() and 'Tutti' end up using, since both
+    // just walk the checkboxes as they appear in the list.
+    function renderPdfSpellList() {
         var list = document.getElementById('pdfSpellList');
-        var visibleSpells = getFilteredSpells();
+        var sortMode = document.getElementById('pdfSortOrder') ? document.getElementById('pdfSortOrder').value : 'name';
+        var previouslyChecked = {};
+        document.querySelectorAll('#pdfSpellList input:checked').forEach(function (cb) { previouslyChecked[cb.value] = true; });
+
+        var visibleSpells = getFilteredSpells().slice();
+        visibleSpells.sort(function (a, b) {
+            if (sortMode === 'levelAsc') return a.level - b.level || a.nameIta.localeCompare(b.nameIta, 'it');
+            if (sortMode === 'levelDesc') return b.level - a.level || a.nameIta.localeCompare(b.nameIta, 'it');
+            if (sortMode === 'class') {
+                var ca = (a.classes && a.classes[0]) || 'zzz', cb2 = (b.classes && b.classes[0]) || 'zzz';
+                return ca.localeCompare(cb2, 'it') || a.nameIta.localeCompare(b.nameIta, 'it');
+            }
+            return a.nameIta.localeCompare(b.nameIta, 'it'); // 'name' (default)
+        });
+
         var filtersActive = filterState.levels.length || filterState.classes.length || filterState.editions.length || document.getElementById('searchBar').value.trim();
         var hintEl = document.getElementById('pdfFilterHint');
         if (hintEl) {
@@ -2554,8 +2795,9 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
             for (var i = 0; i < visibleSpells.length; i++) {
                 var s = visibleSpells[i];
                 var lvl = s.level == 0 ? 'Trucchetto' : s.level + '° Liv.';
+                var checkedAttr = previouslyChecked[s.id] ? ' checked' : '';
                 html += '<div class="pdf-spell-item">' +
-                    '<input type="checkbox" id="pdfchk-' + s.id + '" value="' + s.id + '" onchange="updatePdfCount()">' +
+                    '<input type="checkbox" id="pdfchk-' + s.id + '" value="' + s.id + '" onchange="updatePdfCount()"' + checkedAttr + '>' +
                     '<label for="pdfchk-' + s.id + '">' +
                     '<b>' + escapeHtml(s.nameIta) + '</b>' +
                     (s.nameEng ? ' <span style="opacity:.55; font-size:.85em;">— ' + escapeHtml(s.nameEng) + '</span>' : '') +
@@ -2565,12 +2807,6 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
             list.innerHTML = html;
         }
         updatePdfCount();
-        document.getElementById('printOffsetX').value = printOffset.x;
-        document.getElementById('printOffsetY').value = printOffset.y;
-        var backOn = document.getElementById('includeBackToggle').checked;
-        document.getElementById('duplexHint').classList.toggle('hidden', !backOn);
-        document.getElementById('fineAdjustBox').classList.toggle('hidden', !backOn);
-        document.getElementById('pdfModal').classList.add('open');
     }
     function closePdfModal() { document.getElementById('pdfModal').classList.remove('open'); }
     function pdfSelectAll(state) {
