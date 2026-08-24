@@ -1019,7 +1019,18 @@ const SRD_SPELLS = [{"id": "srd_aiuto", "nome": "Aiuto", "livello": 2, "edizione
         localStorage.setItem('grim_print_offset', JSON.stringify(printOffset));
     }
     let filterState = { levels: [], classes: [], editions: [] };
-    let CLASSES = JSON.parse(localStorage.getItem('grim_custom_classes')) || ["Artificiere","Bardo","Chierico","Druido","Mago","Paladino","Ranger","Stregone","Warlock"];
+    let CLASSES = JSON.parse(localStorage.getItem('grim_custom_classes')) || ["Artefice","Bardo","Chierico","Druido","Mago","Paladino","Ranger","Stregone","Warlock"];
+    // One-time migration: the class used to be mislabeled "Artificiere" instead of
+    // the official Italian term "Artefice". Rename it wherever it might already be
+    // saved (the class list itself, and any homebrew spell tagged with it) so nobody
+    // loses their existing data or has spells silently drop out of the class filter.
+    (function migrateArtificerSpelling() {
+        var idx = CLASSES.indexOf('Artificiere');
+        if (idx !== -1) {
+            CLASSES[idx] = 'Artefice';
+            localStorage.setItem('grim_custom_classes', JSON.stringify(CLASSES));
+        }
+    })();
 
     // Card back design state
     const DEFAULT_PATTERN = { colorA: '#6B4FA0', colorB: '#2C1D4A', patternType: 'none', decoColor: 'light', showIcon: true, icon: '✦', showText: false, text: '', ornateBorder: true };
