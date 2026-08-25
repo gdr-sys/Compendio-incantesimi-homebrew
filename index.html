@@ -519,7 +519,7 @@ footer.footer-noemi {
       <button class="icon-btn" onclick="exportData()" title="Esporta il grimorio (JSON)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12"/><path d="M6 12l6 6 6-6"/><path d="M5 21h14"/></svg></button>
       <button class="icon-btn" onclick="document.getElementById('importFile').click()" title="Importa un grimorio (JSON)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V8"/><path d="M6 12l6-6 6 6"/><path d="M5 21h14"/></svg></button>
       <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
-      <button class="icon-btn" onclick="if(confirm('Cancellare TUTTI gli incantesimi salvati? L\'azione non è reversibile.')) resetCompendio()" title="Reset totale"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+      <button class="icon-btn" onclick="confirmReset()" title="Reset totale"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
       <button class="btn btn-violet" onclick="openBackModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:4px;"><path d="M12 22a10 10 0 1 1 10-10c0 2-1 3-3 3h-2.5a1.5 1.5 0 0 0-1 2.6c.6.6.9 1.3.5 2A2 2 0 0 1 12 22Z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="10.5" r="1"/></svg>Stile carte</button>
       <button class="btn btn-primary" onclick="openPdfModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:4px;"><path d="M6 9V2h12v7"/><rect x="6" y="14" width="12" height="8"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg>Stampa carte</button>
     </div>
@@ -773,6 +773,7 @@ footer.footer-noemi {
       <input id="srdSearchBar" placeholder="Cerca un incantesimo per nome..." oninput="renderSrdModalList()">
     </div>
     <p class="field-hint hidden" id="srdFilterHint" style="margin-top:-6px; margin-bottom:8px;"></p>
+    <button type="button" id="srdAddAllBtn" class="btn btn-primary btn-block hidden" style="margin-bottom:10px;" onclick="addAllSrdMatches()">+ Aggiungi tutti i risultati</button>
     <div class="pdf-spell-list" id="srdModalList" style="max-height:50vh;"></div>
     <div style="display:flex; gap:10px; margin-top:14px;">
       <button onclick="closeSrdModal()" class="btn btn-ghost" style="flex:1;">Chiudi</button>
@@ -781,6 +782,18 @@ footer.footer-noemi {
 </div>
 
 <!-- ============ MODAL: STAMPA CARTE ============ -->
+<!-- ============ MODAL: CONFERMA GENERICA ============ -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal" style="max-width:400px;">
+    <h2 style="font-size:1.15rem;">⚠️ Conferma richiesta</h2>
+    <p class="modal-sub" id="confirmMessage" style="margin-bottom:22px;"></p>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="_confirmResolve(false)">Annulla</button>
+      <button class="btn btn-danger" style="flex:1;" onclick="_confirmResolve(true)">Conferma</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="pdfModal" onclick="if(event.target===this) closePdfModal()">
   <div class="modal">
     <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:5px;"><path d="M6 9V2h12v7"/><rect x="6" y="14" width="12" height="8"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg>Stampa carte incantesimo</h2>
@@ -1289,6 +1302,27 @@ const SRD_SPELLS = [{"id":"srd_aiuto","nome":"Aiuto","livello":2,"edizione":"201
       if (p.showText && p.text) inner += `<span style="font-family:${forPrint ? "Palatino,Georgia,serif" : "var(--font-display)"}; font-size:${textSize}; color:${dc.strong}; letter-spacing:.04em; text-shadow:${dc.shadow};">${p.text}</span>`;
       inner += '</div>';
       return { style, inner };
+    }
+
+    // Replaces native confirm(): browser-native confirm()/alert() dialogs are
+    // blocked without any visible fallback in sandboxed contexts — notably, this
+    // chat's own inline file preview — which silently behaves as if the user
+    // clicked "Cancel" every time, making destructive-action buttons look broken
+    // with no error and no explanation. This in-app modal works identically
+    // everywhere (a real hosted page or this preview) and matches the app's style.
+    // NOTE: _confirmResolve is intentionally NOT declared with let/const here —
+    // inline onclick="..." attributes in the HTML can only resolve identifiers
+    // that exist as real `window` properties, not lexical let/const bindings from
+    // this script. It's assigned directly as window._confirmResolve below instead.
+    function customConfirm(message) {
+        return new Promise(resolve => {
+            document.getElementById('confirmMessage').textContent = message;
+            document.getElementById('confirmModal').classList.add('open');
+            window._confirmResolve = function (result) {
+                document.getElementById('confirmModal').classList.remove('open');
+                resolve(result);
+            };
+        });
     }
 
     function toast(msg, icon) {
@@ -1831,6 +1865,7 @@ const SRD_SPELLS = [{"id":"srd_aiuto","nome":"Aiuto","livello":2,"edizione":"201
         document.getElementById('srdModal').classList.add('open');
     }
     function closeSrdModal() { document.getElementById('srdModal').classList.remove('open'); }
+    let srdModalMatches = [];
     function renderSrdModalList() {
         const q = document.getElementById('srdSearchBar').value.toLowerCase();
         const filtersActive = filterState.levels.length || filterState.classes.length || filterState.editions.length;
@@ -1841,11 +1876,22 @@ const SRD_SPELLS = [{"id":"srd_aiuto","nome":"Aiuto","livello":2,"edizione":"201
             const matchEdition = filterState.editions.length === 0 || filterState.editions.includes(s.edizione);
             return matchSearch && matchLevel && matchClass && matchEdition;
         }).sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
+        srdModalMatches = matches;
         const box = document.getElementById('srdModalList');
         const hintEl = document.getElementById('srdFilterHint');
         if (hintEl) {
             hintEl.classList.toggle('hidden', !filtersActive);
             hintEl.textContent = filtersActive ? '🔎 Stai sfogliando solo gli incantesimi SRD che corrispondono ai filtri attivi in questo momento (' + matches.length + ' su ' + SRD_SPELLS.length + ' totali). Nota: il database SRD non ha incantesimi "Homebrew", quindi se quel filtro è selezionato da solo qui sotto non troverai nulla.' : '';
+        }
+        const addAllBtn = document.getElementById('srdAddAllBtn');
+        if (addAllBtn) {
+            const alreadyOwnedIds = new Set(spells.map(s => s.srcId).filter(Boolean));
+            const addableCount = matches.filter(s => !alreadyOwnedIds.has(s.id)).length;
+            addAllBtn.classList.toggle('hidden', matches.length === 0);
+            addAllBtn.disabled = addableCount === 0;
+            addAllBtn.textContent = addableCount === 0
+                ? '✓ Già tutti nel grimorio'
+                : `+ Aggiungi tutti i risultati (${addableCount})`;
         }
         if (matches.length === 0) {
             box.innerHTML = '<p style="padding:14px; font-family:var(--font-ui); font-size:.85rem; color:var(--ink-muted);">Nessun incantesimo trovato' + (filtersActive ? ' con i filtri/ricerca attuali.' : '.') + '</p>';
@@ -1860,11 +1906,44 @@ const SRD_SPELLS = [{"id":"srd_aiuto","nome":"Aiuto","livello":2,"edizione":"201
                 <button type="button" class="btn btn-ghost btn-sm" style="flex-shrink:0; white-space:nowrap;" onclick="addSrdToGrimoire('${s.id.replace(/'/g, "\\'")}')">+ Aggiungi</button>
             </label>`).join('');
     }
-    function addSrdToGrimoire(id) {
+    // Bulk-imports every SRD spell currently shown in "Sfoglia tutti" (i.e. matching
+    // the active filters + search text) that isn't already in the grimoire — so
+    // preparing e.g. "all 2024 1st-level Wizard spells" doesn't mean clicking
+    // "+ Aggiungi" dozens of times one by one.
+    function addAllSrdMatches() {
+        if (srdModalMatches.length === 0) return;
+        const alreadyOwnedIds = new Set(spells.map(s => s.srcId).filter(Boolean));
+        const toAdd = srdModalMatches.filter(s => !alreadyOwnedIds.has(s.id));
+        if (toAdd.length === 0) { toast('Sono già tutti nel tuo grimorio', 'ℹ️'); return; }
+        const proceed = () => {
+            toAdd.forEach(s => addSrdToGrimoire(s.id, true));
+            localStorage.setItem('grim_master_v1', JSON.stringify(spells));
+            toast(toAdd.length + ' incantesimi aggiunti al grimorio', '📖');
+            render();
+            renderSrdModalList();
+        };
+        if (toAdd.length > 15) {
+            customConfirm(`Stai per aggiungere ${toAdd.length} incantesimi al tuo grimorio in una volta sola. Continuare?`).then(ok => {
+                if (ok) proceed();
+            });
+        } else {
+            proceed();
+        }
+    }
+    let _idCounter = 0;
+    // Timestamp-based ids can collide when several spells are created in the same
+    // millisecond (exactly what happens in a tight bulk-import loop), which would
+    // silently corrupt data since edit/delete look spells up by id. This appends an
+    // incrementing counter to guarantee uniqueness even within the same millisecond.
+    function makeSpellId() {
+        return Date.now() + '_' + (_idCounter++) + '_' + Math.floor(Math.random() * 1000);
+    }
+    function addSrdToGrimoire(id, skipRenderAndToast) {
         const s = SRD_SPELLS.find(x => x.id === id);
         if (!s) return;
         const data = {
-            id: Date.now() + Math.floor(Math.random() * 1000),
+            id: makeSpellId(),
+            srcId: s.id,
             nameIta: s.nome,
             nameEng: s.nome,
             edition: s.edizione,
@@ -1883,6 +1962,7 @@ const SRD_SPELLS = [{"id":"srd_aiuto","nome":"Aiuto","livello":2,"edizione":"201
             image: ''
         };
         spells.push(data);
+        if (skipRenderAndToast) return;
         localStorage.setItem('grim_master_v1', JSON.stringify(spells));
         toast(`"${s.nome}" aggiunto al grimorio`, '📜');
         render();
@@ -2039,12 +2119,13 @@ const SRD_SPELLS = [{"id":"srd_aiuto","nome":"Aiuto","livello":2,"edizione":"201
     }
 
     function deleteSpell(id) {
-        if (confirm("Eliminare definitivamente questo incantesimo?")) {
+        customConfirm("Eliminare definitivamente questo incantesimo?").then(ok => {
+            if (!ok) return;
             spells = spells.filter(s => String(s.id) !== String(id));
             localStorage.setItem('grim_master_v1', JSON.stringify(spells));
             toast('Incantesimo eliminato', '🗑️');
             render();
-        }
+        });
     }
 
     // Clones a spell with a new id and a "(copia)" suffix on the Italian name, so the
@@ -2095,6 +2176,11 @@ const SRD_SPELLS = [{"id":"srd_aiuto","nome":"Aiuto","livello":2,"edizione":"201
         }
     }
 
+    function confirmReset() {
+        customConfirm("Cancellare TUTTI gli incantesimi salvati? L'azione non è reversibile.").then(ok => {
+            if (ok) resetCompendio();
+        });
+    }
     function resetCompendio() {
         spells = [];
         pinnedIds = [];
@@ -2264,13 +2350,15 @@ const SRD_SPELLS = [{"id":"srd_aiuto","nome":"Aiuto","livello":2,"edizione":"201
     }
     function deleteBulk() {
         if (bulkSelectedIds.size === 0) { toast('Nessun incantesimo selezionato', '⚠️'); return; }
-        if (!confirm('Eliminare definitivamente ' + bulkSelectedIds.size + ' incantesimi selezionati? L\'azione non è reversibile.')) return;
-        spells = spells.filter(s => !bulkSelectedIds.has(String(s.id)));
-        localStorage.setItem('grim_master_v1', JSON.stringify(spells));
-        toast(bulkSelectedIds.size + ' incantesimi eliminati', '🗑️');
-        bulkSelectedIds.clear();
-        updateBulkCount();
-        render();
+        customConfirm('Eliminare definitivamente ' + bulkSelectedIds.size + " incantesimi selezionati? L'azione non è reversibile.").then(ok => {
+            if (!ok) return;
+            spells = spells.filter(s => !bulkSelectedIds.has(String(s.id)));
+            localStorage.setItem('grim_master_v1', JSON.stringify(spells));
+            toast(bulkSelectedIds.size + ' incantesimi eliminati', '🗑️');
+            bulkSelectedIds.clear();
+            updateBulkCount();
+            render();
+        });
     }
     function duplicateBulk() {
         if (bulkSelectedIds.size === 0) { toast('Nessun incantesimo selezionato', '⚠️'); return; }
