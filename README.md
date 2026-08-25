@@ -1,7 +1,6 @@
 # Compendio Incantesimi Homebrew
 
 [![Sito live](https://img.shields.io/badge/sito-live-2ea44f)](https://gdr-sys.github.io/Compendio-incantesimi-homebrew/)
-[![Licenza](https://img.shields.io/github/license/gdr-sys/Compendio-incantesimi-homebrew)](LICENSE)
 [![Ultimo commit](https://img.shields.io/github/last-commit/gdr-sys/Compendio-incantesimi-homebrew)](https://github.com/gdr-sys/Compendio-incantesimi-homebrew/commits/main)
 [![Dimensione repo](https://img.shields.io/github/repo-size/gdr-sys/Compendio-incantesimi-homebrew)](https://github.com/gdr-sys/Compendio-incantesimi-homebrew)
 [![Issue aperte](https://img.shields.io/github/issues/gdr-sys/Compendio-incantesimi-homebrew)](https://github.com/gdr-sys/Compendio-incantesimi-homebrew/issues)
