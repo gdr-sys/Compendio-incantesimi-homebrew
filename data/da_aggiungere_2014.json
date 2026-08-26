@@ -1488,6 +1488,23 @@
     "materiali": "",
     "classi": [],
     "descrizione": "",
+    {
+  "id": "deflagrazione_occulta_2014",
+  "nome": "Deflagrazione Occulta",
+  "livello": 0,
+  "edizione": "2014",
+  "scuola": "Invocazione",
+  "tempo_lancio": "1 azione",
+  "gittata": "36 metri",
+  "durata": "Istantanea",
+  "rituale": false,
+  "concentrazione": false,
+  "comp": { "v": true, "s": true, "m": false },
+  "materiali": "",
+  "classi": [Warlock],
+  "descrizione": "Un raggio di energia crepitante sfreccia verso una creatura entro gittata. L'incantatore effettua un attacco a distanza con questo incantesimo contro il bersaglio. Se lo colpisce, il bersaglio subisce 1d10 danni da forza.",
+  "livelli_superiori": "Quando l'incantatore arriva ai livelli superiori, l'incantesimo crea più raggi: due raggi al 5° livello, tre raggi all'11° livello e quattro raggi al 17° livello. L'incantatore può indirizzare i raggi contro lo stesso bersaglio o contro bersagli diversi, effettuando un tiro per colpire separato per ogni raggio."
+},
     "livelli_superiori": ""
   }
 ]
