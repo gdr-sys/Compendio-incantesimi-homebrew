@@ -1,0 +1,74 @@
+name: Valida incantesimi contribuiti
+
+on:
+  pull_request:
+    paths:
+      - "data/da_aggiungere_2014.json"
+      - "data/da_aggiungere_2024.json"
+  push:
+    paths:
+      - "data/da_aggiungere_2014.json"
+      - "data/da_aggiungere_2024.json"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scarica il repository
+        uses: actions/checkout@v4
+
+      - name: Imposta Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Installa il validatore JSON Schema
+        run: npm install --no-save ajv ajv-formats
+
+      - name: Valida data/da_aggiungere_2014.json
+        run: |
+          node -e "
+            const Ajv = require('ajv');
+            const fs = require('fs');
+            const ajv = new Ajv({ allErrors: true });
+            const schema = JSON.parse(fs.readFileSync('data/spell-schema.json', 'utf8'));
+            const data = JSON.parse(fs.readFileSync('data/da_aggiungere_2014.json', 'utf8'));
+            const validate = ajv.compile(schema);
+            const valid = validate(data);
+            if (!valid) {
+              console.error('Errori di validazione in da_aggiungere_2014.json:');
+              console.error(JSON.stringify(validate.errors, null, 2));
+              process.exit(1);
+            }
+            const ids = data.map(s => s.id);
+            const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+            if (dupes.length) {
+              console.error('Id duplicati trovati in da_aggiungere_2014.json:', [...new Set(dupes)]);
+              process.exit(1);
+            }
+            console.log('da_aggiungere_2014.json valido:', data.length, 'incantesimi');
+          "
+
+      - name: Valida data/da_aggiungere_2024.json
+        run: |
+          node -e "
+            const Ajv = require('ajv');
+            const fs = require('fs');
+            const ajv = new Ajv({ allErrors: true });
+            const schema = JSON.parse(fs.readFileSync('data/spell-schema.json', 'utf8'));
+            const data = JSON.parse(fs.readFileSync('data/da_aggiungere_2024.json', 'utf8'));
+            const validate = ajv.compile(schema);
+            const valid = validate(data);
+            if (!valid) {
+              console.error('Errori di validazione in da_aggiungere_2024.json:');
+              console.error(JSON.stringify(validate.errors, null, 2));
+              process.exit(1);
+            }
+            const ids = data.map(s => s.id);
+            const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+            if (dupes.length) {
+              console.error('Id duplicati trovati in da_aggiungere_2024.json:', [...new Set(dupes)]);
+              process.exit(1);
+            }
+            console.log('da_aggiungere_2024.json valido:', data.length, 'incantesimi');
+          "
