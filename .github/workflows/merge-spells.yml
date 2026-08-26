@@ -1,0 +1,39 @@
+name: Unisci incantesimi contribuiti
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/da_aggiungere_2014.json"
+      - "data/da_aggiungere_2024.json"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scarica il repository
+        uses: actions/checkout@v4
+
+      - name: Imposta Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Esegui lo script di unione
+        run: node scripts/merge-spells.js
+
+      - name: Salva le modifiche nel repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html data/da_aggiungere_2014.json data/da_aggiungere_2024.json
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica da salvare."
+          else
+            git commit -m "Unisce automaticamente gli incantesimi contribuiti"
+            git push
+          fi
