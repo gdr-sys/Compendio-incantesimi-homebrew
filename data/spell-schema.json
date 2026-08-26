@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Incantesimo SRD",
+  "description": "Schema di validazione per una voce del database incantesimi (SRD 2014 o 2024). Ogni file in data/da_aggiungere_2014.json e data/da_aggiungere_2024.json deve essere un array di oggetti conformi a questo schema. I campi possono essere vuoti/null finché l'incantesimo non è stato compilato: la validazione blocca solo valori scorretti (non le voci ancora da fare); l'effettiva idoneità all'inclusione è verificata dallo script di unione.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "id", "nome", "livello", "edizione", "scuola", "tempo_lancio",
+      "gittata", "durata", "rituale", "concentrazione", "comp",
+      "materiali", "classi", "descrizione", "livelli_superiori"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^srd_[a-z0-9_]+$",
+        "description": "Identificativo univoco, minuscolo, senza spazi o accenti (es. srd_dissolvi_magia_2024). Non modificare l'id già presente nel template."
+      },
+      "nome": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Nome ufficiale italiano dell'incantesimo. Già compilato nel template: non modificare."
+      },
+      "livello": {
+        "type": ["integer", "null"],
+        "minimum": 0,
+        "maximum": 9,
+        "description": "0 per i trucchetti, 1-9 per gli incantesimi di livello. null finché non compilato."
+      },
+      "edizione": {
+        "type": "string",
+        "enum": ["2014", "2024"]
+      },
+      "scuola": {
+        "type": "string",
+        "enum": [
+          "", "Abiurazione", "Ammaliamento", "Divinazione", "Evocazione",
+          "Illusione", "Invocazione", "Necromanzia", "Trasmutazione"
+        ],
+        "description": "Stringa vuota finché non compilato. Una volta compilato deve essere una delle otto scuole di magia."
+      },
+      "tempo_lancio": { "type": "string" },
+      "gittata": { "type": "string" },
+      "durata": { "type": "string" },
+      "rituale": { "type": "boolean" },
+      "concentrazione": { "type": "boolean" },
+      "comp": {
+        "type": "object",
+        "required": ["v", "s", "m"],
+        "additionalProperties": false,
+        "properties": {
+          "v": { "type": "boolean" },
+          "s": { "type": "boolean" },
+          "m": { "type": "boolean" }
+        }
+      },
+      "materiali": {
+        "type": "string",
+        "description": "Descrizione dei materiali richiesti. Stringa vuota se comp.m è false o non ancora compilato."
+      },
+      "classi": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Elenco delle classi che possono lanciare l'incantesimo. Vuoto finché non compilato."
+      },
+      "descrizione": {
+        "type": "string",
+        "description": "Testo completo dell'effetto dell'incantesimo. Stringa vuota finché non compilato."
+      },
+      "livelli_superiori": {
+        "type": "string",
+        "description": "Testo del paragrafo \"Ai livelli superiori\". Stringa vuota se non applicabile o non ancora compilato."
+      }
+    }
+  }
+}
