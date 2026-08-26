@@ -1,26 +1,3 @@
 [
- {
-    "id": "extra_deflagrazione_occulta_2024",
-    "nome": "Deflagrazione Occulta",
-    "livello": 0,
-    "edizione": "2024",
-    "scuola": "Invocazione",
-    "tempo_lancio": "1 azione",
-    "gittata": "36 metri",
-    "durata": "Istantanea",
-    "rituale": false,
-    "concentrazione": false,
-    "comp": {
-      "v": true,
-      "s": true,
-      "m": false
-    },
-    "materiali": "",
-    "classi": [
-      "Warlock"
-    ],
-    "descrizione": "Qui va la descrizione",
-    "livelli_superiori": ""
-  }
  
 ]
