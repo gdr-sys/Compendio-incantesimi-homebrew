@@ -211,7 +211,7 @@ button { font-family: var(--font-ui); }
 .spell-card.highlight { animation: pulseGlow 1.8s var(--ease); border-color: var(--gold); }
 .spell-card.bulk-mode { cursor: pointer; }
 .spell-card.bulk-selected { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
-#bulkModeBtn.active-toggle { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
+#bulkModeBtn.active-toggle, .icon-btn.active-toggle { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
 @keyframes pulseGlow {
   0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 55%, transparent); }
   40% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--gold) 0%, transparent); }
@@ -516,6 +516,7 @@ footer.footer-noemi {
     </div>
     <div class="topbar-actions">
       <button class="icon-btn" onclick="toggleTheme()" title="Cambia tema chiaro/scuro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
+      <button class="icon-btn" id="toggleClassesBtn" onclick="toggleShowClasses()" title="Mostra/nascondi le classi nella lista"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.5 2.5 3 6 3s6-1.5 6-3v-5"/></svg></button>
       <button class="icon-btn" onclick="exportData()" title="Esporta il grimorio (JSON)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12"/><path d="M6 12l6 6 6-6"/><path d="M5 21h14"/></svg></button>
       <button class="icon-btn" onclick="document.getElementById('importFile').click()" title="Importa un grimorio (JSON)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V8"/><path d="M6 12l6-6 6 6"/><path d="M5 21h14"/></svg></button>
       <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
@@ -2232,6 +2233,17 @@ const SRD_SPELLS = [{"id":"srd_aiuto","nome":"Aiuto","livello":2,"edizione":"201
     }
 
     let bulkMode = false;
+    // Whether the "Classi" line is shown on the on-screen card. Persisted so the
+    // choice sticks between visits. Everything else the user fills in when
+    // creating a spell (school, cast time, range, duration, components, damage/heal)
+    // always shows — classes are the one field the user asked to make optional.
+    let showClassesOnCard = localStorage.getItem('grim_show_classes') !== 'false';
+    function toggleShowClasses() {
+        showClassesOnCard = !showClassesOnCard;
+        localStorage.setItem('grim_show_classes', showClassesOnCard);
+        document.getElementById('toggleClassesBtn').classList.toggle('active-toggle', showClassesOnCard);
+        render();
+    }
     let bulkSelectedIds = new Set();
 
     function render() {
@@ -2274,9 +2286,11 @@ const SRD_SPELLS = [{"id":"srd_aiuto","nome":"Aiuto","livello":2,"edizione":"201
                         </div>
                         <div class="spell-meta">
                             <b>${escapeHtml(s.school)}</b><br>
-                            <b>Lancio:</b> ${escapeHtml(s.cast)} &nbsp;|&nbsp; <b>Durata:</b> ${escapeHtml(formatDuration(s))}<br>
+                            <b>Lancio:</b> ${escapeHtml(s.cast)} &nbsp;|&nbsp; <b>Gittata:</b> ${escapeHtml(s.range || '—')}<br>
+                            <b>Durata:</b> ${escapeHtml(formatDuration(s))}<br>
                             <b>Componenti:</b> ${escapeHtml(comps)}
                             ${s.comp.m && s.mats ? `<br><i>(${escapeHtml(s.mats)})</i>` : ''}
+                            ${(showClassesOnCard && s.classes && s.classes.length) ? `<br><b>Classi:</b> ${escapeHtml(s.classes.join(', '))}` : ''}
                         </div>
                         <p class="spell-effect">${escapeHtmlMultiline(s.effect)}</p>
                         ${s.higher ? `<p class="spell-higher"><b>Livelli Superiori:</b> ${escapeHtmlMultiline(s.higher)}</p>` : ''}
@@ -2428,6 +2442,7 @@ const SRD_SPELLS = [{"id":"srd_aiuto","nome":"Aiuto","livello":2,"edizione":"201
         document.querySelector('#filterLevelGrid .chip').onclick = function(){ handleFilterClick(this,'levels'); };
     })();
 
+    document.getElementById('toggleClassesBtn').classList.toggle('active-toggle', showClassesOnCard);
     render();
 
     // ============================================================
