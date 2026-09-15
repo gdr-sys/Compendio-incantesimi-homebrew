@@ -1,1 +1,52 @@
-[]
+[{
+  "id": "coltello_di_ghiaccio",
+  "nome": "Coltello di Ghiaccio",
+  "livello": 1,
+  "edizione": "2014",
+  "scuola": "Evocazione",
+  "tempo_lancio": "1 azione",
+  "gittata": "18 metri",
+  "durata": "Istantanea",
+  "rituale": false,
+  "concentrazione": false,
+  "comp": { "v": false, "s": true, "m": false },
+  "materiali": "una goccia d'acqua o un frammento di ghiaccio",
+  "classi": ["Druido", "Mago", "Stregone"],
+  "descrizione": "L'incantatore crea un frammento di ghiaccio e lo scaglia contro una creatura entro gittata, effettuando un attacco con incantesimo a distanza contro il bersaglio. Se lo colpisce, il bersaglio subisce 1d10 danni perforanti. Che colpisca o manchi il bersaglio, il frammento poi esplode. II bersaglio e ogni creatura entro 1,5 metri dal punto in cui il ghiaccio è esploso devono superare un tiro salvezza su Destrezza, altrimenti subiscono 2d6 danni da freddo.",
+  "livelli_superiori": "Quando l'incantatore lancia questo incantesimo usando uno slot incantesimo di 2 livello o superiore, i danni da freddo aumentano di 1d6 per ogni slot di livello superiore al 1°"
+},
+{
+  "id": "vortex_warp",
+  "nome": "Vortex Warp",
+  "livello": 2,
+  "edizione": "2014",
+  "scuola": "Evocazione",
+  "tempo_lancio": "1 azione",
+  "gittata": "27 metri",
+  "durata": "Istantanea",
+  "rituale": false,
+  "concentrazione": false,
+  "comp": { "v": true, "s": true, "m": false },
+  "materiali": "",
+  "classi": ["Artefice", "Mago"],
+  "descrizione": "Manipoli magicamente lo spazio attorno a un'altra creatura che puoi vedere entro gittata. Il bersaglio deve superare un tiro salvezza su Costituzione (può scegliere di fallirlo); in caso di fallimento, viene teletrasportato in uno spazio libero a tua scelta che puoi vedere entro gittata. Lo spazio scelto deve trovarsi su una superficie o in un liquido in grado di sostenere il bersaglio senza costringerlo a comprimersi.",
+  "livelli_superiori": "Quando lanci questo incantesimo utilizzando uno slot incantesimo di 3° livello o superiore, la gittata dell'incantesimo aumenta di 9 metri per ogni livello dello slot superiore al 2°."
+},
+{
+  "id": "silvery_barbs",
+  "nome": "Silvery Barbs",
+  "livello": 1,
+  "edizione": "2014",
+  "scuola": "Abiurazione",
+  "tempo_lancio": "1 reazione quando una creatura che puoi vedere entro 18 metri da te supera un tiro per colpire, una prova di caratteristica o un tiro salvezza",
+  "gittata": "18 metri",
+  "durata": "Istantanea",
+  "rituale": false,
+  "concentrazione": false,
+  "comp": { "v": true, "s": false, "m": false },
+  "materiali": "",
+  "classi": ["Bardo", "Mago", "Stregone"],
+  "descrizione": "Distrai magicamente la creatura che ha innescato l'effetto e trasformi la sua momentanea incertezza in incoraggiamento per un'altra creatura. La creatura che ha innescato l'effetto deve tirare nuovamente il d20 e utilizzare il risultato più basso. Puoi quindi scegliere una creatura diversa che puoi vedere entro gittata (puoi scegliere te stesso). La creatura scelta ottiene vantaggio sul prossimo tiro per colpire, prova di caratteristica o tiro salvezza che effettuerà entro 1 minuto. Una creatura può beneficiare di un solo utilizzo di questo incantesimo alla volta.",
+  "livelli_superiori": ""
+}
+]
