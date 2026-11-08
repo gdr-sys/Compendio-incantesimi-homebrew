@@ -54,9 +54,11 @@ Ogni incantesimo, sia esso importato dal database SRD sia creato da zero, può e
 
 ## Stampa delle carte
 
-Il compendio genera fogli pronti per la stampa in formato poker (63 x 88 mm), nove carte per foglio A4, con layout a griglia identico su tutti i principali browser (Chrome, Firefox, Edge).
+Il compendio genera fogli pronti per la stampa su A4 in due formati, poker (63 x 88 mm, nove carte per foglio) e grande (95 x 133 mm, quattro carte per foglio), con layout a griglia identico su tutti i principali browser (Chrome, Firefox, Edge).
 
 - **Fronte carta**: nome, scuola, tempo di lancio, gittata, durata, componenti, classi ed effetto, con colore di intestazione diverso per scuola di magia.
+- **Testo sul fronte**: uno slider regola la dimensione (60%-130%) e l'adattamento automatico riduce il testo solo sulle carte in cui non entrerebbe. Se diventerebbe troppo piccolo, scegli se dividerlo su più carte (1/2, 2/2) o tenere una carta sola con le scritte minuscole. Le carte divise si stampano solo fronte, come carte separate, oppure fronte-retro, con il seguito del testo sul retro.
+- **Formato per singola carta**: il formato generale vale per tutto il mazzo, ma ogni incantesimo può usarne uno diverso; ogni formato viene stampato su fogli propri.
 - **Retro carta personalizzabile**: scegli quali informazioni mostrare sul retro tra livello, tipo di azione, raggio, concentrazione, durata, scuola, rituale, componenti, materiali, classi e danno/cura, oppure usa un retro decorativo uniforme per l'intero mazzo.
 - **Ordinamento**: per nome, livello o classe, con anteprima e conteggio dei fogli prima di stampare.
 - **Filtri applicati anche in stampa**: la finestra di stampa mostra sempre solo gli incantesimi che corrispondono ai filtri e alla ricerca attivi al momento.
