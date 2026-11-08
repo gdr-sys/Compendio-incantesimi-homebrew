@@ -68,7 +68,7 @@ Significato dei campi:
 | `comp.v` / `comp.s` / `comp.m` | `true` o `false` a seconda che richieda componente Verbale, Somatica, Materiale. |
 | `materiali` | Se `comp.m` è `true`, il materiale richiesto. Altrimenti `""`. |
 | `classi` | Elenco delle classi che possono lanciarlo, es. `["Mago", "Stregone"]`. |
-| `descrizione` | Testo completo dell'effetto, dal manuale. |
+| `descrizione` | Testo completo dell'effetto, dal manuale. Le tabelle si scrivono una riga per volta, come `| Tiro | Risultato |`, con la prima riga come intestazione. |
 | `livelli_superiori` | Testo del paragrafo "Ai livelli superiori", se presente. Altrimenti `""`. |
 
 Attenzione alla virgola tra una scheda e la successiva se ne aggiungi più di una nello stesso file: ogni scheda dentro le parentesi quadre `[ ]` va separata dalla successiva con una virgola.

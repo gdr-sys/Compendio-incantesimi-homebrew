@@ -1,7 +1,7 @@
 {
   "name": "Compendio Arcano",
   "short_name": "Arcano",
-  "description": "Compendio di incantesimi D&D (SRD e homebrew) con carte da stampare.",
+  "description": "Grimorio di D&D con incantesimi SRD 2014 e 2024 e homebrew: mazzi per personaggio, slot e concentrazione in sessione, dadi con un clic e carte da stampare.",
   "lang": "it",
   "start_url": "./",
   "scope": "./",
