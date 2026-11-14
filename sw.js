@@ -1,9 +1,16 @@
 // Permette di aprire il Compendio senza connessione. Prova sempre prima la rete, così gli
 // aggiornamenti del sito arrivano subito, e usa la copia salvata solo se la rete manca o tarda.
-const CACHE = 'compendio-arcano-v1';
+const CACHE = 'compendio-arcano-v2';
 const CORE = [
   './',
   'manifest.webmanifest',
+  'assets/fonts/pocket.css',
+  'assets/fonts/figtree-400-latin-3c512d.woff2',
+  'assets/fonts/figtree-400-latin-ext-467cc9.woff2',
+  'assets/fonts/figtree-400i-latin-e8e776.woff2',
+  'assets/fonts/figtree-400i-latin-ext-6bec9b.woff2',
+  'assets/fonts/gloock-400-latin-d8b731.woff2',
+  'assets/fonts/gloock-400-latin-ext-2fbf99.woff2',
   'assets/fonts/gelasio-latin-400-normal.woff2',
   'assets/fonts/gelasio-latin-400-italic.woff2',
   'assets/fonts/gelasio-latin-700-normal.woff2',

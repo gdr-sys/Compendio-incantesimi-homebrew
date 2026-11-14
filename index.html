@@ -15,11 +15,10 @@
 <link rel="icon" href="assets/icons/favicon.svg?v=2" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon-180.png?v=2">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#EAE1CB" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#14111D" media="(prefers-color-scheme: dark)">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>(function(){try{var q=new URLSearchParams(location.search),r=document.documentElement,c=q.get('colore')||localStorage.getItem('grim_colore'),t=q.get('tema')||localStorage.getItem('grim_theme');if(c&&/^(grafite|bosco|cuoio|inchiostro|vino|nero)$/.test(c))r.setAttribute('data-colore',c);if(t==='dark'||t==='light')r.setAttribute('data-theme',t);}catch(e){}})();</script>
+<meta name="theme-color" content="#F8F1ED" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#140C09" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="assets/fonts/pocket.css">
 <style>
 /* ============================================================
    DESIGN TOKENS
@@ -556,6 +555,211 @@ footer.footer-noemi {
 
 @media print { body * { visibility: hidden; } }
 </style>
+<style id="stile-pocket">
+/* ============================================================
+   STILE POCKET GM SCREEN (2026-11)
+   Stessa famiglia grafica di Pocket GM Screen: titoli in Gloock, testo in
+   Figtree, tessere tonde e piatte (niente bordi, ombre o sfumature), un solo
+   colore d'accento e sette tavolozze in notte e giorno. Tutti i colori nascono
+   da tre numeri: tinta del fondo (--h), tinta dell'accento (--ha), intensità (--k).
+   Nome, logo e carte da stampare restano quelli del Compendio Arcano.
+   ============================================================ */
+:root {
+  --h: 40; --ha: 52; --k: 1; --ca: .17;
+  --font-display: 'Gloock', Georgia, 'Times New Roman', serif;
+  --font-body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-ui: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --radius-sm: 12px; --radius-md: 16px; --radius-lg: 20px; --radius-xl: 24px;
+}
+:root[data-colore="grafite"]    { --h: 255; --ha: 255; --k: .22; --ca: .015; }
+:root[data-colore="bosco"]      { --h: 155; --ha: 135; --k: 1;   --ca: .15; }
+:root[data-colore="cuoio"]      { --h: 62;  --ha: 75;  --k: 1.4; --ca: .12; }
+:root[data-colore="inchiostro"] { --h: 262; --ha: 232; --k: 1.3; --ca: .14; }
+:root[data-colore="vino"]       { --h: 8;   --ha: 14;  --k: 1.2; --ca: .17; }
+:root[data-colore="nero"]       { --h: 80;  --ha: 85;  --k: 0;   --ca: .14; }
+
+/* Giorno */
+:root[data-theme="light"] {
+  --bg:        oklch(96.5% calc(.012 * var(--k)) var(--h));
+  --modale:    oklch(94% calc(.016 * var(--k)) var(--h));
+  --surface:   oklch(91.5% calc(.022 * var(--k)) var(--h));
+  --surface-2: oklch(89.5% calc(.026 * var(--k)) var(--h));
+  --bg-soft:   oklch(99% calc(.005 * var(--k)) var(--h));
+  --ink:       oklch(22% calc(.03 * var(--k)) var(--h));
+  --ink-muted: oklch(45% calc(.03 * var(--k)) var(--h));
+  --border:      oklch(84% calc(.025 * var(--k)) var(--h));
+  --border-soft: oklch(86.5% calc(.024 * var(--k)) var(--h));
+  --ac:   oklch(50% var(--ca) var(--ha));
+  --ac-t: #fff;
+  --gold: var(--ac);
+  --gold-soft: color-mix(in oklch, var(--ac) 22%, var(--surface));
+  --gold-ink: oklch(44% var(--ca) var(--ha));
+  --violet: var(--ink);
+  --violet-soft: color-mix(in oklch, var(--ink) 8%, var(--surface));
+  --ember: oklch(48% .16 28);
+  --ember-soft: color-mix(in oklch, var(--ember) 14%, var(--surface));
+  --leaf: oklch(45% .1 145);
+  --leaf-soft: color-mix(in oklch, var(--leaf) 16%, var(--surface));
+  --scrim: oklch(15% .02 var(--h) / .55);
+}
+/* Notte */
+:root[data-theme="dark"] {
+  --bg:        oklch(13% calc(.02 * var(--k)) var(--h));
+  --modale:    oklch(17% calc(.024 * var(--k)) var(--h));
+  --surface:   oklch(22% calc(.03 * var(--k)) var(--h));
+  --surface-2: oklch(25% calc(.034 * var(--k)) var(--h));
+  --bg-soft:   oklch(15% calc(.02 * var(--k)) var(--h));
+  --ink:       oklch(94% calc(.02 * var(--k)) var(--h));
+  --ink-muted: oklch(74% calc(.03 * var(--k)) var(--h));
+  --border:      oklch(30% calc(.03 * var(--k)) var(--h));
+  --border-soft: oklch(27% calc(.03 * var(--k)) var(--h));
+  --ac:   oklch(74% var(--ca) var(--ha));
+  --ac-t: oklch(17% .03 var(--ha));
+  --gold: var(--ac);
+  --gold-soft: color-mix(in oklch, var(--ac) 26%, var(--surface));
+  --gold-ink: oklch(78% calc(var(--ca) * .9) var(--ha));
+  --violet: var(--ink);
+  --violet-soft: color-mix(in oklch, var(--ink) 9%, var(--surface));
+  --ember: oklch(72% .14 28);
+  --ember-soft: color-mix(in oklch, var(--ember) 18%, var(--surface));
+  --leaf: oklch(75% .11 145);
+  --leaf-soft: color-mix(in oklch, var(--leaf) 16%, var(--surface));
+  --scrim: oklch(5% .01 var(--h) / .72);
+}
+:root[data-theme="dark"][data-colore="nero"] { --bg: #000; --modale: oklch(11% 0 0); --surface: oklch(16% 0 0); --surface-2: oklch(20% 0 0); --bg-soft: oklch(9% 0 0); }
+
+/* ── Testo: Gloock solo per i titoli, niente maiuscoletto ── */
+body { background: var(--bg); font-family: var(--font-body); font-size: 1rem; line-height: 1.55; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.01em; }
+::selection { background: color-mix(in oklch, var(--ac) 35%, transparent); color: inherit; }
+:focus-visible { outline: 2px solid var(--ac); outline-offset: 3px; }
+input, textarea { caret-color: var(--ac); }
+.brand h1 { font-size: 1.7rem; line-height: 1; letter-spacing: -0.02em; }
+.brand-sub, .filter-group-label, .pin-label, .badge, legend, .session-title, .compare-grid .compare-label {
+  text-transform: none; letter-spacing: 0;
+}
+.brand-sub { font-size: .85rem; margin-top: 4px; }
+.filter-group-label, legend, .session-title, .compare-grid .compare-label { font-size: .82rem; font-weight: 700; }
+legend { color: var(--gold-ink); }
+.badge { font-size: .74rem; font-weight: 600; padding: 3px 10px; }
+.spell-title { font-size: 1.4rem; line-height: 1.15; }
+.spell-title-eng, .spell-meta { font-size: .85rem; }
+.spell-effect { font-size: 1rem; }
+
+/* ── Barra in alto ── */
+.topbar { backdrop-filter: none; background: var(--bg); border-bottom-color: transparent; padding-top: 22px; padding-bottom: 16px; }
+.brand-logo { filter: none; }
+
+/* ── Pulsanti: pillole piatte, un solo colore d'accento ── */
+.btn { font-family: var(--font-ui); font-size: .92rem; border: 0; min-height: 44px; padding: 10px 20px; }
+.btn-sm { min-height: 36px; padding: 7px 14px; font-size: .84rem; }
+.btn-primary { background: var(--ac); color: var(--ac-t); box-shadow: none; }
+.btn-primary:hover { box-shadow: none; filter: brightness(1.08); }
+.btn-ghost, .btn-violet { background: color-mix(in oklch, var(--ink) 10%, transparent); color: var(--ink); border-color: transparent; }
+.btn-ghost:hover, .btn-violet:hover { background: color-mix(in oklch, var(--ink) 17%, transparent); border-color: transparent; color: var(--ink); }
+.btn-danger { background: var(--ember-soft); color: var(--ember); }
+.icon-btn { width: 44px; height: 44px; border: 0; border-radius: 14px; background: color-mix(in oklch, var(--ink) 10%, transparent); }
+.icon-btn:hover { background: color-mix(in oklch, var(--ink) 17%, transparent); border-color: transparent; transform: none; }
+#bulkModeBtn.active-toggle, .icon-btn.active-toggle { background: var(--ink); color: var(--bg); border-color: transparent; }
+.fab { background: var(--ac); color: var(--ac-t); box-shadow: 0 10px 30px -8px oklch(0% 0 0 / .45); font-size: .95rem; }
+.fab:hover { transform: none; filter: brightness(1.08); box-shadow: 0 10px 30px -8px oklch(0% 0 0 / .45); }
+.close-x { border-radius: 12px; }
+
+/* ── Ricerca, filtri, scelte ── */
+.search-wrap input { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 999px; font-family: var(--font-ui); font-size: 1rem; min-height: 46px; }
+.search-wrap input:focus, input:focus, select:focus, textarea:focus { border-color: var(--ac); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ac) 25%, transparent); background: var(--bg-soft); }
+.filter-toggle { border: 0; background: color-mix(in oklch, var(--ink) 8%, transparent); color: var(--ink); min-height: 36px; font-size: .88rem; }
+.filter-toggle:hover { color: var(--ink); background: color-mix(in oklch, var(--ink) 14%, transparent); }
+.filter-toggle.has-active { background: var(--ink); color: var(--bg); }
+.active-count { background: var(--bg); color: var(--ink); }
+.filter-groups { background: var(--surface); border: 0; }
+.chip { border: 0; background: color-mix(in oklch, var(--ink) 8%, transparent); font-size: .86rem; }
+.chip:hover { background: color-mix(in oklch, var(--ink) 14%, transparent); }
+.chip.selected { background: var(--ink); color: var(--bg); font-weight: 600; }
+.toggle-btn { border: 0; background: color-mix(in oklch, var(--ink) 8%, transparent); border-radius: 12px; font-size: .86rem; }
+.toggle-btn.selected { background: var(--ink); color: var(--bg); font-weight: 600; }
+.mode-tabs { background: color-mix(in oklch, var(--ink) 8%, transparent); }
+.mode-tab.active { background: var(--ink); color: var(--bg); box-shadow: none; }
+.switch input:checked + .switch-track { background: var(--ac); }
+.slot-pip { border-color: var(--ac); background: var(--ac); }
+.slot-step { border: 0; background: color-mix(in oklch, var(--ink) 10%, transparent); border-radius: 8px; }
+.pin-panel { background: var(--surface); border: 0; }
+.pin-tag { border: 0; background: color-mix(in oklch, var(--ink) 10%, transparent); color: var(--ink); }
+.pin-tag:hover { background: var(--ink); color: var(--bg); }
+.dice-roll { color: var(--gold-ink); background: color-mix(in oklch, var(--ac) 16%, transparent); border-radius: 6px; font-weight: 600; }
+.deck-strip, .back-toggle-box { background: var(--surface-2); color: var(--ink); }
+.back-toggle-box p { color: var(--ink); }
+.session-spell.is-conc .session-name { color: var(--gold-ink); }
+.compare-grid .compare-differs { background: color-mix(in oklch, var(--ac) 10%, transparent); }
+
+/* ── Tessere degli incantesimi: tonde e piatte ── */
+.spell-card { background: var(--surface); border: 0; border-radius: 20px; box-shadow: none; }
+.spell-card:hover { transform: none; box-shadow: none; background: var(--surface-2); }
+.spell-card.highlight { border: 0; box-shadow: 0 0 0 3px var(--ac); animation: none; }
+.spell-card.bulk-selected { border: 0; box-shadow: 0 0 0 3px var(--ac); }
+.spell-spine { height: 5px; }
+.spine-abiurazione { background: #5d8f57; } .spine-ammaliamento { background: #c4604f; }
+.spine-divinazione { background: #4f86b8; } .spine-evocazione { background: #c08a3a; }
+.spine-illusione { background: #8467b8; } .spine-invocazione { background: #d4a94a; }
+.spine-necromanzia { background: #6c6479; } .spine-trasmutazione { background: #3f9e8c; }
+.spell-body { padding: 20px 22px 22px; }
+.spell-effect { border-top: 0; padding-top: 4px; }
+.spell-higher { border-top: 0; padding-top: 0; }
+.empty-state { background: transparent; border: 1.5px dashed var(--border); border-radius: 20px; }
+.empty-state h3 { font-size: 1.75rem; }
+
+/* ── Finestre, pannello laterale, campi ── */
+.modal { background: var(--modale); border: 0; border-radius: 24px; box-shadow: 0 30px 80px -20px oklch(0% 0 0 / .6); }
+.modal h2, .field-row h2 { font-size: 1.6rem; }
+.drawer { background: var(--modale); border-left: 0; box-shadow: -20px 0 60px -20px oklch(0% 0 0 / .5); }
+.modal-overlay, .drawer-overlay { backdrop-filter: none; }
+input, select, textarea { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; font-family: var(--font-ui); font-size: .95rem; }
+textarea { font-family: var(--font-ui); line-height: 1.55; }
+label.field-label { font-size: .84rem; }
+.check-row { background: color-mix(in oklch, var(--ink) 6%, transparent); }
+.autocomplete-list { background: var(--modale); border: 1px solid var(--border); box-shadow: 0 16px 40px -12px oklch(0% 0 0 / .45); }
+.autocomplete-item:hover { background: color-mix(in oklch, var(--ink) 9%, transparent); }
+.toast { background: var(--surface-2); border: 0; box-shadow: 0 12px 32px -10px oklch(0% 0 0 / .5); font-size: .92rem; }
+.img-drop { border-color: var(--border); }
+.img-drop:hover { border-color: var(--ac); color: var(--ink); }
+.pdf-spell-list { border-color: var(--border); }
+.card-frame { box-shadow: 0 14px 30px -12px oklch(0% 0 0 / .45); }
+.preset-swatch.selected, .color-swatch.selected { border-color: var(--ac); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ac) 35%, transparent); }
+.icon-chip.selected { border-color: var(--ac); }
+.spell-meta b { font-weight: 700; }
+.diff-del { background: color-mix(in oklch, var(--ember) 30%, transparent); }
+.diff-ins { background: color-mix(in oklch, var(--leaf) 32%, transparent); }
+
+/* ── Carattere delle carte anche nell'anteprima del retro, uguale alla stampa ── */
+@font-face { font-family: GrimCardSerif; font-style: normal; font-weight: 400; font-display: swap; src: url(assets/fonts/gelasio-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: GrimCardSerif; font-style: italic; font-weight: 400; font-display: swap; src: url(assets/fonts/gelasio-latin-400-italic.woff2) format('woff2'); }
+@font-face { font-family: GrimCardSerif; font-style: normal; font-weight: 700; font-display: swap; src: url(assets/fonts/gelasio-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: GrimCardSerif; font-style: italic; font-weight: 700; font-display: swap; src: url(assets/fonts/gelasio-latin-700-italic.woff2) format('woff2'); }
+
+/* Icone dei pulsanti accanto alla ricerca: la regola della lente le spostava tutte dentro il campo */
+.search-wrap .btn svg { position: static; transform: none; opacity: 1; pointer-events: auto; }
+/* Etichetta del livello: tinta come le altre pillole, non bianca */
+.badge[style*="--bg-soft"] { background: color-mix(in oklch, var(--ink) 9%, transparent) !important; color: var(--ink) !important; }
+
+/* ── Tavolozze ── */
+.tavolozze { position: relative; }
+.tavolozze-menu {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 90; width: 248px;
+  background: var(--modale); border-radius: 20px; padding: 14px; display: none;
+  box-shadow: 0 20px 50px -14px oklch(0% 0 0 / .55); font-family: var(--font-ui);
+}
+.tavolozze.aperto .tavolozze-menu { display: block; }
+.tavolozze-menu p { margin: 0 0 10px; font-size: .84rem; font-weight: 700; color: var(--ink); }
+.tavolozze-griglia { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.tavolozza {
+  display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 0; border: 0; background: none;
+  color: var(--ink-muted); font: 600 .72rem var(--font-ui); cursor: pointer;
+}
+.tavolozza i { display: block; width: 36px; height: 36px; border-radius: 50%; box-shadow: inset 0 0 0 1px oklch(50% 0 0 / .25); }
+.tavolozza[aria-pressed="true"] { color: var(--ink); }
+.tavolozza[aria-pressed="true"] i { box-shadow: 0 0 0 2px var(--modale), 0 0 0 4px var(--ink); }
+@media (max-width: 640px) { .brand h1 { font-size: 1.35rem; } .tavolozze-menu { left: auto; right: -60px; } }
+</style>
 </head>
 <body>
 <div class="app-shell">
@@ -569,6 +773,7 @@ footer.footer-noemi {
     </div>
     <div class="topbar-actions">
       <button class="icon-btn" onclick="toggleTheme()" title="Cambia tema chiaro/scuro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
+      <div class="tavolozze" id="tavolozze"><button class="icon-btn" type="button" onclick="apriTavolozze(event)" title="Tavolozza dei colori" aria-haspopup="true" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/></svg></button><div class="tavolozze-menu" role="menu"><p>Tavolozza</p><div class="tavolozze-griglia" id="tavolozzeGriglia"></div></div></div>
       <button class="icon-btn" id="toggleClassesBtn" onclick="toggleShowClasses()" title="Mostra/nascondi le classi nella lista"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.5 2.5 3 6 3s6-1.5 6-3v-5"/></svg></button>
       <button class="icon-btn" onclick="exportData()" title="Esporta il grimorio (JSON)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12"/><path d="M6 12l6 6 6-6"/><path d="M5 21h14"/></svg></button>
       <button class="icon-btn" onclick="document.getElementById('importFile').click()" title="Importa un grimorio (JSON)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V8"/><path d="M6 12l6-6 6 6"/><path d="M5 21h14"/></svg></button>
@@ -1726,7 +1931,7 @@ const SRD_SPELLS = [{"id":"srd_aiuto_2014","nome":"Aiuto","livello":2,"edizione"
       const textSize = forPrint ? '9pt' : '.85rem';
       let inner = `<div style="position:absolute; inset:8%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center;">`;
       if (p.showIcon && p.icon) inner += `<span style="font-size:${iconSize}; color:${dc.strong}; line-height:1; text-shadow:${dc.shadow};">${p.icon}</span>`;
-      if (p.showText && p.text) inner += `<span style="font-family:${forPrint ? "GrimCardSerif,Palatino,Georgia,serif" : "var(--font-display)"}; font-size:${textSize}; color:${dc.strong}; letter-spacing:.04em; text-shadow:${dc.shadow};">${p.text}</span>`;
+      if (p.showText && p.text) inner += `<span style="font-family:${forPrint ? "GrimCardSerif,Palatino,Georgia,serif" : "GrimCardSerif,Palatino,Georgia,serif"}; font-size:${textSize}; color:${dc.strong}; letter-spacing:.04em; text-shadow:${dc.shadow};">${p.text}</span>`;
       inner += '</div>';
       return { style, inner };
     }
@@ -1762,6 +1967,38 @@ const SRD_SPELLS = [{"id":"srd_aiuto_2014","nome":"Aiuto","livello":2,"edizione"
       setTimeout(() => { el.style.opacity = '0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(), 300); }, ms || 2600);
     }
 
+    // Tavolozze di Pocket GM Screen: stessi nomi e stessi colori dell'app.
+    const TAVOLOZZE = [
+      ['brace', 'Brace', 40, 52, 1, .17], ['grafite', 'Grafite', 255, 255, .22, .015], ['bosco', 'Bosco', 155, 135, 1, .15], ['cuoio', 'Cuoio', 62, 75, 1.4, .12],
+      ['inchiostro', 'Inchiostro', 262, 232, 1.3, .14], ['vino', 'Vino', 8, 14, 1.2, .17], ['nero', 'Nero', 80, 85, 0, .14]
+    ];
+    function disegnaTavolozze() {
+      const g = document.getElementById('tavolozzeGriglia'); if (!g) return;
+      const att = document.documentElement.getAttribute('data-colore') || 'brace';
+      g.innerHTML = TAVOLOZZE.map(([id, nome, h, ha, k, ca]) => {
+        const fondo = id === 'nero' ? '#111' : `oklch(24% ${(.035 * k).toFixed(3)} ${h})`, ac = `oklch(70% ${ca} ${ha})`;
+        return `<button type="button" class="tavolozza" role="menuitemradio" aria-pressed="${id === att}" onclick="scegliTavolozza('${id}')"><i style="background:conic-gradient(${ac} 0 50%, ${fondo} 0 100%)"></i>${nome}</button>`;
+      }).join('');
+    }
+    function apriTavolozze(ev) {
+      ev.stopPropagation();
+      const box = document.getElementById('tavolozze');
+      const aperto = !box.classList.contains('aperto');
+      box.classList.toggle('aperto', aperto);
+      box.querySelector('.icon-btn').setAttribute('aria-expanded', String(aperto));
+      if (aperto) disegnaTavolozze();
+    }
+    function scegliTavolozza(id) {
+      const r = document.documentElement;
+      if (id === 'brace') r.removeAttribute('data-colore'); else r.setAttribute('data-colore', id);
+      safeSetItem('grim_colore', id);
+      disegnaTavolozze();
+    }
+    document.addEventListener('click', (e) => {
+      const box = document.getElementById('tavolozze');
+      if (box && box.classList.contains('aperto') && !box.contains(e.target)) { box.classList.remove('aperto'); box.querySelector('.icon-btn').setAttribute('aria-expanded', 'false'); }
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const box = document.getElementById('tavolozze'); if (box) box.classList.remove('aperto'); } });
     function toggleTheme() {
       const root = document.documentElement;
       root.setAttribute('data-theme', root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
