@@ -1,0 +1,35 @@
+rules_version = '2';
+// Regole del database del Compendio Arcano (da incollare in Firebase > Firestore > Regole).
+// Ognuno legge e scrive solo il proprio grimorio; i link condivisi si leggono con il link,
+// li crea solo chi ha un indirizzo email confermato e li elimina solo chi li ha creati.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /utenti/{uid}/incantesimi/{id} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow write: if request.auth != null && request.auth.uid == uid
+        && (request.resource.data.keys().hasOnly(['j', 'h', 'agg']) || request.resource.data.keys().hasOnly(['del', 'agg']))
+        && request.resource.data.agg == request.time
+        && (!('j' in request.resource.data) || (request.resource.data.j is string && request.resource.data.j.size() < 1000000));
+    }
+
+    match /utenti/{uid}/dati/impostazioni {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow write: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['j', 'h', 'agg'])
+        && request.resource.data.j is string && request.resource.data.j.size() < 1000000;
+    }
+
+    match /condivisi/{id} {
+      allow get: if true;
+      allow list: if request.auth != null && resource.data.autore == request.auth.uid;
+      allow create: if request.auth != null && request.auth.token.email_verified == true
+        && request.resource.data.keys().hasOnly(['autore', 'nome', 'creato', 'dati'])
+        && request.resource.data.autore == request.auth.uid
+        && request.resource.data.creato == request.time
+        && request.resource.data.nome is string && request.resource.data.nome.size() <= 80
+        && request.resource.data.dati is string && request.resource.data.dati.size() < 900000;
+      allow delete: if request.auth != null && resource.data.autore == request.auth.uid;
+    }
+  }
+}

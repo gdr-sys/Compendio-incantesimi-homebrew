@@ -1,0 +1,46 @@
+/* Account facoltativo: pulsante in alto e pannello. Usa le variabili della grafica Pocket. */
+#accountBtn { position: relative; }
+#accountBtn::after {
+  content: ""; position: absolute; right: 6px; bottom: 6px; width: 9px; height: 9px; border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--bg, var(--surface)); display: none;
+}
+#accountBtn[data-stato="ok"]::after { display: block; background: oklch(62% .15 150); }
+#accountBtn[data-stato="sincronizzo"]::after { display: block; background: var(--ac, var(--gold)); animation: acc-pulsa 1s ease-in-out infinite alternate; }
+#accountBtn[data-stato="offline"]::after { display: block; background: var(--ink-muted); }
+#accountBtn[data-stato="errore"]::after { display: block; background: var(--ember); }
+@keyframes acc-pulsa { to { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { #accountBtn[data-stato="sincronizzo"]::after { animation: none; } }
+
+#accountCorpo .acc-google { gap: 10px; }
+.acc-oppure { display: flex; align-items: center; gap: 12px; margin: 18px 0 14px; font-family: var(--font-ui); font-size: .78rem; color: var(--ink-muted); }
+.acc-oppure::before, .acc-oppure::after { content: ""; flex: 1; height: 1px; background: color-mix(in oklch, var(--ink) 15%, transparent); }
+.acc-form input { width: 100%; margin-bottom: 12px; }
+.acc-azioni { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.acc-azioni .btn { flex: 1; justify-content: center; }
+.acc-link {
+  background: none; border: 0; padding: 0; font: inherit; color: var(--ac, var(--gold-ink)); text-decoration: underline;
+  text-underline-offset: 2px; cursor: pointer;
+}
+.acc-form > .acc-link { display: block; margin: 14px auto 6px; font-family: var(--font-ui); font-size: .84rem; min-height: 32px; }
+.acc-errore { font-family: var(--font-ui); font-size: .84rem; color: var(--ember); margin: 0 0 10px; }
+
+.acc-chi { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-family: var(--font-ui); }
+.acc-chi b { display: block; overflow-wrap: anywhere; }
+.acc-chi span:not(.acc-iniziale) { display: block; font-size: .82rem; color: var(--ink-muted); overflow-wrap: anywhere; }
+.acc-iniziale {
+  flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--ac, var(--gold)); color: var(--ac-t, #fff); font-weight: 700; font-size: 1.1rem;
+}
+.acc-avviso {
+  font-family: var(--font-ui); font-size: .84rem; line-height: 1.5; padding: 10px 12px; border-radius: 12px; margin-bottom: 12px;
+  background: color-mix(in oklch, var(--ac, var(--gold)) 14%, transparent);
+}
+.acc-stato { font-family: var(--font-ui); font-size: .88rem; margin: 0 0 10px; }
+.acc-stato[data-stato="errore"] { color: var(--ember); }
+.acc-titolo { font-family: var(--font-ui); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-muted); margin: 22px 0 8px; }
+.acc-link-lista { display: grid; gap: 8px; }
+.acc-riga { display: flex; align-items: center; gap: 8px; font-family: var(--font-ui); font-size: .88rem; }
+.acc-riga > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.acc-riga small { display: block; color: var(--ink-muted); font-size: .76rem; }
+.acc-fondo { display: flex; gap: 10px; justify-content: space-between; flex-wrap: wrap; margin-top: 24px; padding-top: 16px; border-top: 1px solid color-mix(in oklch, var(--ink) 12%, transparent); }
+.share-breve:not(:empty) { margin: 4px 0 12px; }
