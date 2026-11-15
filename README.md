@@ -17,7 +17,7 @@
 
 **Compendio Incantesimi Homebrew** è un'applicazione web "all-in-one" pensata per Dungeon Master e giocatori di D&D che vogliono un unico posto dove organizzare incantesimi ufficiali (SRD 2014 e 2024) e creazioni originali (Homebrew), trasformarli in vere carte da stampare e tenerli sotto mano durante la partita.
 
-L'app è **pronta all'uso**: si apre nel browser, senza account e senza installare nulla. I dati restano sul tuo dispositivo.
+L'app è **pronta all'uso**: si apre nel browser, senza installare nulla. L'account è facoltativo: senza, i dati restano sul tuo dispositivo; con l'accesso (Google o email) il grimorio ti segue su ogni dispositivo.
 
 **[Apri il Compendio](https://gdr-sys.github.io/Compendio-incantesimi-homebrew/)**
 
@@ -40,6 +40,7 @@ L'app è **pronta all'uso**: si apre nel browser, senza account e senza installa
 - [Condividere mazzi e incantesimi](#condividere-mazzi-e-incantesimi)
 - [Uso offline e installazione](#uso-offline-e-installazione)
 - [Come iniziare](#come-iniziare)
+- [Account e sincronizzazione](#account-e-sincronizzazione)
 - [Note su localStorage e portabilità dei dati](#note-su-localstorage-e-portabilità-dei-dati)
 - [Tecnologie utilizzate](#tecnologie-utilizzate)
 - [Struttura del progetto](#struttura-del-progetto)
@@ -244,6 +245,17 @@ Non serve installare nulla.
 
 In alternativa, puoi scaricare il repository e aprire `index.html` direttamente nel browser: in questo caso, se il browser blocca l'accesso al salvataggio locale sui file aperti direttamente dal disco, l'app te lo segnala con un avviso e continua a funzionare comunque, senza salvare le modifiche tra un caricamento e l'altro.
 
+## Account e sincronizzazione
+
+L'account è facoltativo e si apre dall'icona della persona in alto.
+
+- **Accesso** con Google oppure con email e password (con conferma dell'indirizzo e recupero della password).
+- **Grimorio su ogni dispositivo**: incantesimi, mazzi, preferiti, classi e formati di stampa si salvano anche nell'account. Le modifiche fatte su dispositivi diversi si sommano; offline si continua a lavorare e la sincronizzazione riparte quando torna la rete.
+- **Link brevi**: con l'accesso, "Condividi" crea un link corto che porta anche le immagini. I link si vedono e si eliminano dal pannello dell'account.
+- **Uscita ed eliminazione**: uscendo si può scegliere se lasciare il grimorio sul dispositivo; "Elimina account" cancella tutto ciò che è online.
+
+I dati dell'account sono su Google Firebase (Firestore, in Europa). Le regole del database sono in [`firestore.rules`](firestore.rules): ognuno legge e scrive solo il proprio grimorio.
+
 ## Note su localStorage e portabilità dei dati
 
 I dati vengono salvati nel `localStorage` del browser in uso: cambiare browser, dispositivo o svuotare la cache comporta la perdita dei dati se non sono stati esportati in precedenza. Si consiglia di usare regolarmente la funzione di esportazione per avere un backup del proprio grimorio.
@@ -267,10 +279,13 @@ Importare un backup completo sostituisce il grimorio attuale, mentre importare u
 
 ## Struttura del progetto
 
-L'applicazione è contenuta in un singolo file `index.html`, che include markup, fogli di stile, logica applicativa e database SRD, senza passaggi di build o dipendenze da installare.
+L'applicazione è quasi tutta nel file `index.html`, che include markup, fogli di stile, logica applicativa e database SRD, senza passaggi di build o dipendenze da installare. L'account facoltativo è in `js/account.js`, che scarica Firebase solo quando serve.
 
 ```text
 index.html             L'applicazione e il database SRD
+js/account.js          Account, sincronizzazione e link brevi (Firebase)
+assets/account.css     Stile del pannello account
+firestore.rules        Regole di sicurezza del database
 sw.js                  Uso offline
 manifest.webmanifest   Installazione come app
 assets/fonts/          Font delle carte (Gelasio, licenza OFL)

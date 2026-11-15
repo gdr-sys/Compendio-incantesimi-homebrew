@@ -760,6 +760,7 @@ label.field-label { font-size: .84rem; }
 .tavolozza[aria-pressed="true"] i { box-shadow: 0 0 0 2px var(--modale), 0 0 0 4px var(--ink); }
 @media (max-width: 640px) { .brand h1 { font-size: 1.35rem; } .tavolozze-menu { left: auto; right: -60px; } }
 </style>
+<link rel="stylesheet" href="assets/account.css">
 </head>
 <body>
 <div class="app-shell">
@@ -772,6 +773,7 @@ label.field-label { font-size: .84rem; }
       </div>
     </div>
     <div class="topbar-actions">
+      <button class="icon-btn" id="accountBtn" data-stato="fuori" onclick="Account.apri()" title="Accedi per ritrovare il grimorio su ogni dispositivo" aria-label="Account"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button>
       <button class="icon-btn" onclick="toggleTheme()" title="Cambia tema chiaro/scuro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
       <div class="tavolozze" id="tavolozze"><button class="icon-btn" type="button" onclick="apriTavolozze(event)" title="Tavolozza dei colori" aria-haspopup="true" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/></svg></button><div class="tavolozze-menu" role="menu"><p>Tavolozza</p><div class="tavolozze-griglia" id="tavolozzeGriglia"></div></div></div>
       <button class="icon-btn" id="toggleClassesBtn" onclick="toggleShowClasses()" title="Mostra/nascondi le classi nella lista"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.5 2.5 3 6 3s6-1.5 6-3v-5"/></svg></button>
@@ -1129,7 +1131,16 @@ label.field-label { font-size: .84rem; }
       <button class="btn btn-primary btn-sm" onclick="copyShareLink()">Copia link</button>
     </div>
     <p class="field-hint" id="shareWarn"></p>
+    <div id="shareBreve" class="share-breve"></div>
     <button class="btn btn-ghost btn-sm" onclick="downloadShareFile()">Scarica come file</button>
+  </div>
+</div>
+
+<!-- ============ MODALE: ACCOUNT ============ -->
+<div class="modal-overlay" id="accountModal" onclick="if(event.target===this) closeOverlay('accountModal')">
+  <div class="modal" style="max-width:460px;">
+    <div class="field-row"><h2>Il tuo account</h2><button class="close-x" onclick="closeOverlay('accountModal')" aria-label="Chiudi">✕</button></div>
+    <div id="accountCorpo"></div>
   </div>
 </div>
 
@@ -4755,5 +4766,6 @@ const SRD_SPELLS = [{"id":"srd_aiuto_2014","nome":"Aiuto","livello":2,"edizione"
         if (e.target === this) closePdfModal();
     });
 </script>
+<script src="js/account.js"></script>
 </body>
 </html>
